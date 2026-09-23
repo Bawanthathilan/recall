@@ -10,7 +10,6 @@ import { Chips } from '@/components/FormControls';
 import { resetAllProgress } from '@/db/queries';
 import { seedSampleDecks } from '@/db/seed';
 import { confirm } from '@/lib/confirm';
-import { goBack } from '@/lib/nav';
 import { enableReminders, remindersSupported, sendTestReminder } from '@/lib/notifications';
 import { formatTime } from '@/lib/reminders';
 import { useSettings, type Goal } from '@/store/settings';
@@ -67,12 +66,7 @@ export default function Settings() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <View style={styles.topBar}>
-          <Pressable onPress={goBack} accessibilityRole="button" accessibilityLabel="Back" style={styles.iconButton}>
-            <Ionicons name="arrow-back" size={22} color={colors.ink} />
-          </Pressable>
-          <Text style={type.title}>Settings</Text>
-        </View>
+        <Text style={type.title}>Settings</Text>
 
         <View style={styles.section}>
           <Text style={type.label} nativeID="name-label">
@@ -212,17 +206,6 @@ export default function Settings() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.ground },
   content: { paddingHorizontal: spacing.xl, paddingTop: spacing.sm, paddingBottom: spacing.xxl, gap: spacing.lg },
-  topBar: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.sm },
-  iconButton: {
-    width: touchTarget,
-    height: touchTarget,
-    borderRadius: radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.line,
-  },
   section: { padding: spacing.xl, gap: spacing.md, backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.line },
   input: {
     ...type.body,

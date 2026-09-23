@@ -36,9 +36,11 @@ code (e.g. audio recording) need a new store build. Phase 8 adds a backend.
 
 ## Phase 5 — Ship v1.0  ← next
 Local-only app, no backend. Goal: real people using it.
-- [ ] Hide unfinished UI in the store build (Explore tab is a placeholder until Phase 7)
-- [ ] Development build (EAS): app icon, splash screen, bundle IDs, version numbers,
-      expo-notifications config plugin (reminder icon/colour)
+- [x] Hide unfinished UI: Explore tab hidden until Phase 7; Settings takes its tab slot
+- [x] App icon, splash, favicon, notification icon (`node scripts/make-icons.mjs`)
+- [x] Bundle ID `com.bawantha.recall`, iPhone only, expo-notifications plugin, `eas.json`
+      (versions managed by EAS, build numbers auto-increment)
+- [ ] Development build running on the iOS Simulator (`npx expo run:ios`) and Android
 - [ ] Crash reporting, E2E tests of the main flows, large-deck performance (10,000+ cards)
 - [ ] Privacy policy (data stays on the device), store listings and screenshots
 - [ ] TestFlight + Play internal testing, then store submission
@@ -68,6 +70,8 @@ Local-only app, no backend. Goal: real people using it.
 - A note's type can't be changed after creating (fields differ per type)
 - Vocab text uses the system font until Noto Sans JP arrives in Phase 6
 - Exam decks: FSRS may still schedule a review after the exam date; an "exam mode" that caps intervals could come later
-- Reminders are local notifications (work in Expo Go). The expo-notifications config plugin (custom icon/colour) is added in Phase 5
+- Reminders are local notifications (work in Expo Go). Android shows them with the card icon in the accent colour
+- Bundle ID `com.bawantha.recall` can still change until the first store upload — after that it's permanent
+- iPhone only for v1.0 (`supportsTablet: false`): an iPad version needs its own screenshots and layout checks
 - v1.0 ships before export (Phase 7): a user's cards live only on their phone (plus the phone's own
   iCloud / Google backup). Consider pulling a simple export into Phase 5 if that's a concern.

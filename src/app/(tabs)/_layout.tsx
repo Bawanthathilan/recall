@@ -52,7 +52,9 @@ export default function TabsLayout() {
       <Tabs.Screen name="decks" options={{ title: 'Decks', tabBarIcon: (p) => <TabIcon {...p} on="albums" off="albums-outline" /> }} />
       <Tabs.Screen name="add" options={{ title: 'Create', tabBarButton: () => <AddButton /> }} />
       <Tabs.Screen name="stats" options={{ title: 'Stats', tabBarIcon: (p) => <TabIcon {...p} on="stats-chart" off="stats-chart-outline" /> }} />
-      <Tabs.Screen name="explore" options={{ title: 'Explore', tabBarIcon: (p) => <TabIcon {...p} on="search" off="search-outline" /> }} />
+      <Tabs.Screen name="settings" options={{ title: 'Settings', tabBarIcon: (p) => <TabIcon {...p} on="settings" off="settings-outline" /> }} />
+      {/* Hidden until Phase 7 gives it real content — stores reject placeholder screens. `href: null` keeps the route but drops the tab. */}
+      <Tabs.Screen name="explore" options={{ href: null }} />
     </Tabs>
   );
 }
