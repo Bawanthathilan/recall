@@ -11,7 +11,8 @@
       "bundleIdentifier": "com.bawantha.recall",
       "config": {
         "usesNonExemptEncryption": false
-      }
+      },
+      "usesAppleSignIn": true
     },
     "android": {
       "package": "com.bawantha.recall",
@@ -46,7 +47,9 @@
           "color": "#C2410C"
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      "expo-web-browser",
+      "expo-apple-authentication"
     ],
     "scheme": "recall",
     "experiments": {

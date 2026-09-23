@@ -62,13 +62,18 @@ Local-only app, no backend. Goal: real people using it.
 - [ ] Export a single deck as CSV; skip duplicates when re-importing the same Anki deck
 
 ## Phase 8 — Accounts & sync
-- [ ] Sign in with Apple and Google (one tap, no password); email link as a fallback
+- [x] Sign-in screen + Settings → Account (Supabase Auth): Google (browser OAuth, works in Expo Go),
+      email code/link, Sign in with Apple (built, off until `EXPO_PUBLIC_APPLE_SIGN_IN=true`)
+- [x] Supabase project + Google OAuth client; Google sign-in tested on iPhone (Expo Go)
+- [ ] Test email code sign-in on a phone
+- [ ] Turn on Sign in with Apple after joining the Apple Developer Program
 - [ ] Backend (auth provider + database), offline-first sync — the app keeps working without an account
 - [ ] Image occlusion, personalised FSRS parameters
 
 ## Open decisions
 - "Mastered" = card in Review state with FSRS stability ≥ 21 days (default, change if you like)
 - Onboarding steps 2–3 = name + new cards/day (mockup only designs step 1)
+- Testing sign-in in Expo Go needs `npm run start:tunnel`: Supabase won't redirect to an IP address (exp://192.168…)
 - Login: Apple is required on iOS whenever Google (or any other social login) is offered — App Store rule 4.8
 - AI features ("Explain it differently", "Generate cards from PDF") are off the roadmap for now
 - Web: `accessibilityState` isn't mapped to `aria-*`; consider switching to `aria-checked`/`aria-selected` props

@@ -53,6 +53,8 @@ export default function RootLayout() {
         <Stack.Screen name="card/[noteId]" options={{ presentation: 'modal' }} />
         <Stack.Screen name="deck/new" options={{ presentation: 'modal' }} />
         <Stack.Screen name="import" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="sign-in" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="auth/callback" />
         <Stack.Screen name="deck/[deckId]/edit" options={{ presentation: 'modal' }} />
       </Stack>
     </SQLiteProvider>

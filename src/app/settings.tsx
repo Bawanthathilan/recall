@@ -5,12 +5,14 @@ import { useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { Chips } from '@/components/FormControls';
 import { resyncReminders } from '@/components/ReminderSync';
 import { backupCounts, backupFileName, BackupError, createBackup, parseBackup, restoreBackup } from '@/db/backup';
 import { resetAllProgress } from '@/db/queries';
 import { seedSampleDecks } from '@/db/seed';
+import { appleSignInEnabled, profile, providerName, signOut, useSession } from '@/lib/auth';
 import { confirm } from '@/lib/confirm';
 import { goBack } from '@/lib/nav';
 import { pickFile, saveFile } from '@/lib/files';
@@ -47,6 +49,15 @@ export default function Settings() {
   const [denied, setDenied] = useState(false);
   const [testSent, setTestSent] = useState(false);
   const [dataStatus, setDataStatus] = useState<string | null>(null);
+  const session = useSession();
+  const account = session ? profile(session) : null;
+  // The name can change outside this screen (signing in fills it from Google), so keep the text field in step.
+  // (Adjusting state during render is React's recommended alternative to an effect here.)
+  const [shownName, setShownName] = useState(name);
+  if (name !== shownName) {
+    setShownName(name);
+    setDraftName(name);
+  }
 
   async function toggleReminder(on: boolean) {
     if (!on) return update({ reminderEnabled: false });
@@ -106,6 +117,38 @@ export default function Settings() {
             <Ionicons name="arrow-back" size={22} color={colors.ink} />
           </Pressable>
           <Text style={type.title}>Settings</Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={type.label}>ACCOUNT</Text>
+          {session && account ? (
+            <>
+              <View style={styles.accountRow}>
+                <Avatar name={account.name || session.user.email || '?'} photoUrl={account.photoUrl} size={touchTarget + 8} />
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  {!!account.name && <Text style={type.bodySemi}>{account.name}</Text>}
+                  <Text style={type.caption} numberOfLines={1}>
+                    {session.user.email ?? 'Private email'} · {providerName(session)}
+                  </Text>
+                </View>
+              </View>
+              <Text style={type.caption}>Sync across devices is coming next. Your cards are on this phone.</Text>
+              <Button
+                title="Sign out"
+                variant="secondary"
+                onPress={async () => {
+                  if (await confirm('Sign out?', 'Your cards stay on this phone.', 'Sign out')) await signOut();
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <Text style={type.caption}>
+                {`Optional. Sign in with ${appleSignInEnabled ? 'Apple, Google' : 'Google'} or email to get ready for syncing across your devices.`}
+              </Text>
+              <Button title="Sign in" variant="secondary" disabled={session === undefined} onPress={() => router.push('/sign-in')} />
+            </>
+          )}
         </View>
 
         <View style={styles.section}>
@@ -261,6 +304,7 @@ export default function Settings() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.ground },
   content: { paddingHorizontal: spacing.xl, paddingTop: spacing.sm, paddingBottom: spacing.xxl, gap: spacing.lg },
+  accountRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   topBar: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.sm },
   iconButton: {
     width: touchTarget,
