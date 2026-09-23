@@ -50,6 +50,19 @@
     "scheme": "recall",
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c095a797-b74c-4211-b7b8-1c08630a529a"
+      }
+    },
+    "owner": "bawantha98",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/c095a797-b74c-4211-b7b8-1c08630a529a"
     }
   }
 }

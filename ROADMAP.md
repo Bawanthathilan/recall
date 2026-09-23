@@ -44,7 +44,8 @@ Local-only app, no backend. Goal: real people using it.
 - [ ] Crash reporting, E2E tests of the main flows, large-deck performance (10,000+ cards)
 - [ ] Privacy policy (data stays on the device), store listings and screenshots
 - [ ] TestFlight + Play internal testing, then store submission
-- [ ] EAS Update, so JavaScript fixes ship without a store review
+- [x] EAS Update configured (channels per build profile; runtime = app version)
+- [ ] First `eas update` published to TestFlight testers
 
 ## Phase 6 — Language & media
 - [ ] Text-to-speech with 0.5× speed, Japanese fonts
