@@ -45,7 +45,8 @@
           "icon": "./assets/notification-icon.png",
           "color": "#C2410C"
         }
-      ]
+      ],
+      "expo-sharing"
     ],
     "scheme": "recall",
     "experiments": {
@@ -59,7 +60,7 @@
     },
     "owner": "bawantha98",
     "runtimeVersion": {
-      "policy": "appVersion"
+      "policy": "fingerprint"
     },
     "updates": {
       "url": "https://u.expo.dev/c095a797-b74c-4211-b7b8-1c08630a529a"

@@ -7,9 +7,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
 import { Chips } from '@/components/FormControls';
+import { resyncReminders } from '@/components/ReminderSync';
+import { backupCounts, backupFileName, BackupError, createBackup, parseBackup, restoreBackup } from '@/db/backup';
 import { resetAllProgress } from '@/db/queries';
 import { seedSampleDecks } from '@/db/seed';
 import { confirm } from '@/lib/confirm';
+import { goBack } from '@/lib/nav';
+import { pickFile, saveFile } from '@/lib/files';
 import { enableReminders, remindersSupported, sendTestReminder } from '@/lib/notifications';
 import { formatTime } from '@/lib/reminders';
 import { useSettings, type Goal } from '@/store/settings';
@@ -42,6 +46,7 @@ export default function Settings() {
   const [samplesAdded, setSamplesAdded] = useState(false);
   const [denied, setDenied] = useState(false);
   const [testSent, setTestSent] = useState(false);
+  const [dataStatus, setDataStatus] = useState<string | null>(null);
 
   async function toggleReminder(on: boolean) {
     if (!on) return update({ reminderEnabled: false });
@@ -63,10 +68,45 @@ export default function Settings() {
     setResetDone(true);
   }
 
+  async function backUp() {
+    const backup = await createBackup(db);
+    const { decks, cards } = backupCounts(backup);
+    await saveFile(backupFileName(), JSON.stringify(backup), 'application/json', 'public.json');
+    setDataStatus(`Backup made: ${decks} decks, ${cards} cards.`);
+  }
+
+  async function restore() {
+    setDataStatus(null);
+    const file = await pickFile();
+    if (!file) return;
+    try {
+      const backup = parseBackup(await file.text());
+      const { decks, cards, reviews } = backupCounts(backup);
+      const made = new Date(backup.exportedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+      const ok = await confirm(
+        'Replace everything with this backup?',
+        `Backup from ${made}: ${decks} decks, ${cards} cards, ${reviews} reviews. The cards in Recall now will be deleted.`,
+        'Restore',
+      );
+      if (!ok) return;
+      await restoreBackup(db, backup);
+      resyncReminders(db);
+      setDataStatus(`Restored ${decks} decks and ${cards} cards.`);
+    } catch (e) {
+      setDataStatus(e instanceof BackupError ? e.message : 'Couldn’t restore that file. Your cards haven’t changed.');
+      if (!(e instanceof BackupError)) console.warn('Restore failed', e);
+    }
+  }
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={type.title}>Settings</Text>
+        <View style={styles.topBar}>
+          <Pressable onPress={goBack} accessibilityRole="button" accessibilityLabel="Back" style={styles.iconButton}>
+            <Ionicons name="arrow-back" size={22} color={colors.ink} />
+          </Pressable>
+          <Text style={type.title}>Settings</Text>
+        </View>
 
         <View style={styles.section}>
           <Text style={type.label} nativeID="name-label">
@@ -185,6 +225,21 @@ export default function Settings() {
         </View>
 
         <View style={styles.section}>
+          <Text style={type.label}>YOUR DATA</Text>
+          <Text style={type.caption}>
+            Your cards are stored only on this phone. A backup is one file with every deck, card and review — keep it in Files, iCloud Drive or
+            Google Drive.
+          </Text>
+          <Button title="Back up now" variant="secondary" onPress={backUp} />
+          <Button title="Restore from a backup" variant="secondary" onPress={restore} />
+          {dataStatus && (
+            <Text style={type.caption} accessibilityLiveRegion="polite">
+              {dataStatus}
+            </Text>
+          )}
+        </View>
+
+        <View style={styles.section}>
           <Text style={type.label}>TESTING</Text>
           <Text style={type.caption}>Sample decks include Code, Cloze and Vocabulary cards. Reset makes every card new again.</Text>
           <Button
@@ -206,6 +261,17 @@ export default function Settings() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.ground },
   content: { paddingHorizontal: spacing.xl, paddingTop: spacing.sm, paddingBottom: spacing.xxl, gap: spacing.lg },
+  topBar: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.sm },
+  iconButton: {
+    width: touchTarget,
+    height: touchTarget,
+    borderRadius: radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.line,
+  },
   section: { padding: spacing.xl, gap: spacing.md, backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.line },
   input: {
     ...type.body,

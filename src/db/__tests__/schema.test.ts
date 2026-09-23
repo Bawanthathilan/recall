@@ -4,38 +4,9 @@
  * Runs the real migrations against a real SQLite database (Node's built-in
  * node:sqlite), through a tiny adapter with the same async API as expo-sqlite.
  */
-import { DatabaseSync } from 'node:sqlite';
-import type { SQLiteDatabase } from 'expo-sqlite';
-
 import { cardsRemovedBy, createNote, getDeckSummaries, getProgress, getStudyQueue, searchNotes, updateNote } from '@/db/queries';
 import { migrateDbIfNeeded, MIGRATIONS } from '@/db/schema';
-
-type Param = string | number | null;
-
-function openTestDb() {
-  const raw = new DatabaseSync(':memory:');
-  const args = (params: unknown[]) => (params.length === 1 && Array.isArray(params[0]) ? params[0] : params) as Param[];
-  const db = {
-    execAsync: async (sql: string) => void raw.exec(sql),
-    runAsync: async (sql: string, ...params: unknown[]) => {
-      const r = raw.prepare(sql).run(...args(params));
-      return { lastInsertRowId: Number(r.lastInsertRowid), changes: Number(r.changes) };
-    },
-    getAllAsync: async (sql: string, ...params: unknown[]) => raw.prepare(sql).all(...args(params)),
-    getFirstAsync: async (sql: string, ...params: unknown[]) => raw.prepare(sql).get(...args(params)) ?? null,
-    withTransactionAsync: async (task: () => Promise<void>) => {
-      raw.exec('BEGIN');
-      try {
-        await task();
-        raw.exec('COMMIT');
-      } catch (e) {
-        raw.exec('ROLLBACK');
-        throw e;
-      }
-    },
-  };
-  return { raw, db: db as unknown as SQLiteDatabase };
-}
+import { openTestDb } from '@/db/testing/openTestDb';
 
 describe('fresh install', () => {
   it('creates the latest schema and seeds sample decks of every type', async () => {

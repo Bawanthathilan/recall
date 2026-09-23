@@ -47,10 +47,12 @@ export default function RootLayout() {
         <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
         <Stack.Screen name="study/[deckId]" />
         <Stack.Screen name="deck/[deckId]/index" />
+        <Stack.Screen name="settings" />
         {/* Editors slide up as sheets (iOS) with Cancel / Save in their own header. */}
         <Stack.Screen name="card/new" options={{ presentation: 'modal' }} />
         <Stack.Screen name="card/[noteId]" options={{ presentation: 'modal' }} />
         <Stack.Screen name="deck/new" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="import" options={{ presentation: 'modal' }} />
         <Stack.Screen name="deck/[deckId]/edit" options={{ presentation: 'modal' }} />
       </Stack>
     </SQLiteProvider>

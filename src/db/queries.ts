@@ -217,9 +217,10 @@ export async function createNote(db: SQLiteDatabase, deckId: number, note: NoteD
     t,
   );
   const noteId = result.lastInsertRowId;
+  const ords = cardOrds(note);
   const cardIds: number[] = [];
-  for (const ord of cardOrds(note)) cardIds.push(await insertNewCard(db, noteId, ord, now));
-  return { noteId, cardIds };
+  for (const ord of ords) cardIds.push(await insertNewCard(db, noteId, ord, now));
+  return { noteId, cardIds, ords };
 }
 
 /**

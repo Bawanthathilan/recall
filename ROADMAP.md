@@ -36,7 +36,7 @@ code (e.g. audio recording) need a new store build. Phase 8 adds a backend.
 
 ## Phase 5 — Ship v1.0  ← next
 Local-only app, no backend. Goal: real people using it.
-- [x] Hide unfinished UI: Explore tab hidden until Phase 7; Settings takes its tab slot
+- [x] Hide unfinished UI (Explore returned in Phase 7; Settings is behind the gear on Decks)
 - [x] App icon, splash, favicon, notification icon (`node scripts/make-icons.mjs`)
 - [x] Bundle ID `com.bawantha.recall`, iPhone only, expo-notifications plugin, `eas.json`
       (versions managed by EAS, build numbers auto-increment)
@@ -44,7 +44,7 @@ Local-only app, no backend. Goal: real people using it.
 - [ ] Crash reporting, E2E tests of the main flows, large-deck performance (10,000+ cards)
 - [ ] Privacy policy (data stays on the device), store listings and screenshots
 - [ ] TestFlight + Play internal testing, then store submission
-- [x] EAS Update configured (channels per build profile; runtime = app version)
+- [x] EAS Update configured (channels per build profile; runtime = fingerprint of the native code)
 - [ ] First `eas update` published to TestFlight testers
 
 ## Phase 6 — Language & media
@@ -52,9 +52,14 @@ Local-only app, no backend. Goal: real people using it.
 - [ ] Images and audio on cards, record pronunciation (new store build)
 - [ ] Math formulas
 
-## Phase 7 — Import, export, Explore
-- [ ] Anki .apkg import, CSV import, export/backup
-- [ ] Explore tab with starter decks per goal
+## Phase 7 — Import, export, Explore  ← in progress
+- [x] Backup & restore: whole database as one JSON file (Settings → Your data), all-or-nothing restore
+- [x] CSV / tab-separated import (Excel, Sheets, Quizlet, Anki plain-text export): column picker, clozes detected
+- [x] Anki .apkg import: old and new (zstd) formats, basic/reversed/cloze, HTML → Recall markup,
+      deck hierarchy, tags, review progress kept (Anki FSRS state when present)
+- [x] Explore tab: 12 starter decks, "For you" by onboarding goal, Import entry point
+- [ ] Test on a phone: file picker, share sheet, a real Anki deck (needs Expo Go or a new build)
+- [ ] Export a single deck as CSV; skip duplicates when re-importing the same Anki deck
 
 ## Phase 8 — AI, accounts, sync
 - [ ] Backend + sign-in, offline-first sync
@@ -66,7 +71,9 @@ Local-only app, no backend. Goal: real people using it.
 - Onboarding steps 2–3 = name + new cards/day (mockup only designs step 1)
 - Anki import link and "Explain it differently" hidden until Phases 7 and 8
 - Web: `accessibilityState` isn't mapped to `aria-*`; consider switching to `aria-checked`/`aria-selected` props
-- Decks and Explore screens aren't in the mockup yet — built in the same style for now
+- Decks, Explore and Import screens aren't in the mockup yet — built in the same style for now
+- Imports skip images and audio (Phase 6 adds media); image-occlusion notes are skipped
+- Anki learning-step cards import as new; review cards keep their schedule
 - Image occlusion card type moved to Phase 8 (needs image support + drawing UI)
 - A note's type can't be changed after creating (fields differ per type)
 - Vocab text uses the system font until Noto Sans JP arrives in Phase 6
@@ -74,5 +81,3 @@ Local-only app, no backend. Goal: real people using it.
 - Reminders are local notifications (work in Expo Go). Android shows them with the card icon in the accent colour
 - Bundle ID `com.bawantha.recall` can still change until the first store upload — after that it's permanent
 - iPhone only for v1.0 (`supportsTablet: false`): an iPad version needs its own screenshots and layout checks
-- v1.0 ships before export (Phase 7): a user's cards live only on their phone (plus the phone's own
-  iCloud / Google backup). Consider pulling a simple export into Phase 5 if that's a concern.
