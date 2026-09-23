@@ -1,7 +1,9 @@
 # Recall roadmap
 
 Design source: Claude Design artifact "Flashcard App UI" (7 screens).
-Phases 2–6 stay inside Expo Go; Phase 7 moves to development builds; Phase 8 adds a backend.
+Phases 1–4 run in Expo Go. From Phase 5 (shipping) on, the app uses development builds:
+JavaScript-only changes ship as over-the-air updates (EAS Update); features with new native
+code (e.g. audio recording) need a new store build. Phase 8 adds a backend.
 
 ## ✅ Phase 1 — Foundation
 - [x] Expo + TypeScript + Expo Router, theme tokens
@@ -32,19 +34,24 @@ Phases 2–6 stay inside Expo Go; Phase 7 moves to development builds; Phase 8 a
 - [x] Exam deadlines per deck (migration v4), per-deck new cards/day, pace card with "Use N a day"
 - [x] Daily reminder notifications (next 7 days planned locally; skips days you've studied or have nothing due)
 
-## Phase 5 — Language & media
+## Phase 5 — Ship v1.0  ← next
+Local-only app, no backend. Goal: real people using it.
+- [ ] Hide unfinished UI in the store build (Explore tab is a placeholder until Phase 7)
+- [ ] Development build (EAS): app icon, splash screen, bundle IDs, version numbers,
+      expo-notifications config plugin (reminder icon/colour)
+- [ ] Crash reporting, E2E tests of the main flows, large-deck performance (10,000+ cards)
+- [ ] Privacy policy (data stays on the device), store listings and screenshots
+- [ ] TestFlight + Play internal testing, then store submission
+- [ ] EAS Update, so JavaScript fixes ship without a store review
+
+## Phase 6 — Language & media
 - [ ] Text-to-speech with 0.5× speed, Japanese fonts
-- [ ] Images and audio on cards, record pronunciation
+- [ ] Images and audio on cards, record pronunciation (new store build)
 - [ ] Math formulas
 
-## Phase 6 — Import, export, Explore
+## Phase 7 — Import, export, Explore
 - [ ] Anki .apkg import, CSV import, export/backup
 - [ ] Explore tab with starter decks per goal
-
-## Phase 7 — Ship v1.0
-- [ ] Development build (EAS), icon/splash/store listing
-- [ ] Crash reporting, E2E tests, large-deck performance
-- [ ] TestFlight + Play internal testing
 
 ## Phase 8 — AI, accounts, sync
 - [ ] Backend + sign-in, offline-first sync
@@ -54,11 +61,13 @@ Phases 2–6 stay inside Expo Go; Phase 7 moves to development builds; Phase 8 a
 ## Open decisions
 - "Mastered" = card in Review state with FSRS stability ≥ 21 days (default, change if you like)
 - Onboarding steps 2–3 = name + new cards/day (mockup only designs step 1)
-- Anki import link and "Explain it differently" hidden until Phases 6 and 8
+- Anki import link and "Explain it differently" hidden until Phases 7 and 8
 - Web: `accessibilityState` isn't mapped to `aria-*`; consider switching to `aria-checked`/`aria-selected` props
 - Decks and Explore screens aren't in the mockup yet — built in the same style for now
 - Image occlusion card type moved to Phase 8 (needs image support + drawing UI)
 - A note's type can't be changed after creating (fields differ per type)
-- Vocab text uses the system font until Noto Sans JP arrives in Phase 5
+- Vocab text uses the system font until Noto Sans JP arrives in Phase 6
 - Exam decks: FSRS may still schedule a review after the exam date; an "exam mode" that caps intervals could come later
-- Reminders are local notifications (work in Expo Go). The expo-notifications config plugin (custom icon/colour) is added in Phase 7
+- Reminders are local notifications (work in Expo Go). The expo-notifications config plugin (custom icon/colour) is added in Phase 5
+- v1.0 ships before export (Phase 7): a user's cards live only on their phone (plus the phone's own
+  iCloud / Google backup). Consider pulling a simple export into Phase 5 if that's a concern.

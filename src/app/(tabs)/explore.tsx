@@ -5,7 +5,7 @@ export default function Explore() {
     <ComingSoon
       title="Explore"
       icon="compass-outline"
-      phase="Phase 6"
+      phase="Phase 7"
       items={['Starter decks for each learning goal', 'Import from Anki and CSV']}
     />
   );
