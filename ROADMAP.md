@@ -61,15 +61,16 @@ Local-only app, no backend. Goal: real people using it.
 - [ ] Test on a phone: file picker, share sheet, a real Anki deck (needs Expo Go or a new build)
 - [ ] Export a single deck as CSV; skip duplicates when re-importing the same Anki deck
 
-## Phase 8 — AI, accounts, sync
-- [ ] Backend + sign-in, offline-first sync
-- [ ] "Explain it differently" and "Generate cards from PDF" (Claude API via backend)
+## Phase 8 — Accounts & sync
+- [ ] Sign in with Apple and Google (one tap, no password); email link as a fallback
+- [ ] Backend (auth provider + database), offline-first sync — the app keeps working without an account
 - [ ] Image occlusion, personalised FSRS parameters
 
 ## Open decisions
 - "Mastered" = card in Review state with FSRS stability ≥ 21 days (default, change if you like)
 - Onboarding steps 2–3 = name + new cards/day (mockup only designs step 1)
-- Anki import link and "Explain it differently" hidden until Phases 7 and 8
+- Login: Apple is required on iOS whenever Google (or any other social login) is offered — App Store rule 4.8
+- AI features ("Explain it differently", "Generate cards from PDF") are off the roadmap for now
 - Web: `accessibilityState` isn't mapped to `aria-*`; consider switching to `aria-checked`/`aria-selected` props
 - Decks, Explore and Import screens aren't in the mockup yet — built in the same style for now
 - Imports skip images and audio (Phase 6 adds media); image-occlusion notes are skipped
