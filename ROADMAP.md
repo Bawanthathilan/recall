@@ -40,7 +40,8 @@ Local-only app, no backend. Goal: real people using it.
 - [x] App icon, splash, favicon, notification icon (`node scripts/make-icons.mjs`)
 - [x] Bundle ID `com.bawantha.recall`, iPhone only, expo-notifications plugin, `eas.json`
       (versions managed by EAS, build numbers auto-increment)
-- [ ] Development build running on the iOS Simulator (`npx expo run:ios`) and Android
+- [x] Development build running on the iOS 27 Simulator (scene life cycle via `plugins/withSceneLifecycle.js`)
+- [ ] Development build on Android
 - [ ] Crash reporting, E2E tests of the main flows, large-deck performance (10,000+ cards)
 - [ ] Privacy policy (data stays on the device), store listings and screenshots
 - [ ] TestFlight + Play internal testing, then store submission
@@ -85,5 +86,6 @@ Local-only app, no backend. Goal: real people using it.
 - Vocab text uses the system font until Noto Sans JP arrives in Phase 6
 - Exam decks: FSRS may still schedule a review after the exam date; an "exam mode" that caps intervals could come later
 - Reminders are local notifications (work in Expo Go). Android shows them with the card icon in the accent colour
+- iOS 27 requires the scene life cycle; Expo 57's template doesn't adopt it yet, so `plugins/withSceneLifecycle.js` does. Remove after an SDK upgrade that includes it
 - Bundle ID `com.bawantha.recall` can still change until the first store upload — after that it's permanent
 - iPhone only for v1.0 (`supportsTablet: false`): an iPad version needs its own screenshots and layout checks

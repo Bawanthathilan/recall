@@ -49,7 +49,8 @@
       ],
       "expo-sharing",
       "expo-web-browser",
-      "expo-apple-authentication"
+      "expo-apple-authentication",
+      "./plugins/withSceneLifecycle.js"
     ],
     "scheme": "recall",
     "experiments": {
