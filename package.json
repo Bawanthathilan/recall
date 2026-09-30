@@ -51,6 +51,7 @@
   },
   "scripts": {
     "start": "expo start",
+    "start:go": "expo start --go",
     "start:tunnel": "expo start --tunnel --go",
     "android": "expo run:android",
     "ios": "expo run:ios",
@@ -66,5 +67,6 @@
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
     }
-  }
+  },
+  "packageManager": "yarn@4.18.0+sha512.fcb8716fe7cd0eece141ffc18b92193a9df9204c1ba83189c288835223fc0bbe64af473bab0d5e9927a7daeb5caf2bb07eb2787cc9338ca040ea125f2a1f2f7e"
 }
