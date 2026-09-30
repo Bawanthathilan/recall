@@ -2,7 +2,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Pace } from '@/lib/exam';
-import { colors, fonts, radius, ratingColors, spacing, touchTarget } from '@/theme';
+import { t } from '@/i18n';
+import { colors, fonts, lineHeight, radius, ratingColors, spacing, touchTarget } from '@/theme';
 
 type Look = { bg: string; iconBg: string; icon: 'calendar' | 'alert' | 'checkmark-done' | 'flag'; title: string; body: string };
 
@@ -21,10 +22,13 @@ export function ExamCard({ deckName, pace, onApply }: { deckName: string; pace: 
   const look = LOOKS[pace.status];
   const title =
     pace.status === 'past'
-      ? `${deckName}: exam date passed`
+      ? t('examCard.passed', { deck: deckName })
       : pace.status === 'today'
-        ? `${deckName} exam today`
-        : `${deckName} exam ${pace.daysLeft === 1 ? 'tomorrow' : `in ${pace.daysLeft} days`}`;
+        ? t('examCard.today', { deck: deckName })
+        : t('examCard.upcoming', {
+            deck: deckName,
+            when: pace.daysLeft === 1 ? t('exam.tomorrow') : t('exam.inDays', { days: t('common.days', { count: pace.daysLeft }) }),
+          });
 
   return (
     <View style={[styles.card, { backgroundColor: look.bg }]} accessible={!onApply || !pace.suggestedPerDay}>
@@ -38,10 +42,10 @@ export function ExamCard({ deckName, pace, onApply }: { deckName: string; pace: 
           <Pressable
             onPress={() => onApply(pace.suggestedPerDay!)}
             accessibilityRole="button"
-            accessibilityLabel={`Use ${pace.suggestedPerDay} new cards a day for ${deckName}`}
+            accessibilityLabel={t('examCard.useA11y', { count: pace.suggestedPerDay, deck: deckName })}
             style={({ pressed }) => [styles.apply, { borderColor: look.title }, pressed && { opacity: 0.7 }]}
           >
-            <Text style={[styles.applyText, { color: look.title }]}>Use {pace.suggestedPerDay} a day</Text>
+            <Text style={[styles.applyText, { color: look.title }]}>{t('examCard.use', { count: pace.suggestedPerDay })}</Text>
           </Pressable>
         )}
       </View>
@@ -53,8 +57,8 @@ const styles = StyleSheet.create({
   card: { flexDirection: 'row', gap: 14, padding: spacing.lg, borderRadius: 20 },
   icon: { width: 44, height: 44, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
   text: { flex: 1, gap: 2 },
-  title: { fontFamily: fonts.bodySemi, fontSize: 15, lineHeight: 20 },
-  body: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18 },
+  title: { fontFamily: fonts.bodySemi, fontSize: 15, lineHeight: lineHeight(15, 20) },
+  body: { fontFamily: fonts.body, fontSize: 13, lineHeight: lineHeight(13, 18) },
   apply: {
     alignSelf: 'flex-start',
     marginTop: spacing.sm,

@@ -17,18 +17,19 @@ import { confirm } from '@/lib/confirm';
 import { goBack } from '@/lib/nav';
 import { pickFile, saveFile } from '@/lib/files';
 import { enableReminders, remindersSupported, sendTestReminder } from '@/lib/notifications';
+import { language, setLanguage, t, type Language } from '@/i18n';
+import { formatDate } from '@/i18n/dates';
 import { formatTime } from '@/lib/reminders';
 import { useSettings, type Goal } from '@/store/settings';
 import { colors, fonts, radius, spacing, touchTarget, type } from '@/theme';
 
-const GOAL_NAMES: Record<Goal, string> = {
-  code: 'Programming',
-  university: 'University',
-  language: 'Languages',
-  exam: 'Exam prep',
-  medicine: 'Medicine',
-  other: 'Something else',
-};
+const goalName = (g: Goal) => t(`goals.${g}.title`);
+
+/** Language names are written in their own script, whatever the app's language. */
+const LANGUAGE_OPTIONS: [Language, string][] = [
+  ['en', 'English'],
+  ['si', 'සිංහල'],
+];
 
 const PACES = [10, 20, 30, 50];
 
@@ -74,7 +75,7 @@ export default function Settings() {
   const timeKey = `${reminderHour}:${reminderMinute}`;
 
   async function reset() {
-    if (!(await confirm('Reset study progress?', 'Every card becomes new again and your review history is deleted.', 'Reset'))) return;
+    if (!(await confirm(t('settings.resetTitle'), t('settings.resetBody'), t('settings.resetConfirm')))) return;
     await resetAllProgress(db);
     setResetDone(true);
   }
@@ -83,7 +84,7 @@ export default function Settings() {
     const backup = await createBackup(db);
     const { decks, cards } = backupCounts(backup);
     await saveFile(backupFileName(), JSON.stringify(backup), 'application/json', 'public.json');
-    setDataStatus(`Backup made: ${decks} decks, ${cards} cards.`);
+    setDataStatus(t('settings.backupMade', { decks: t('common.decks', { count: decks }), cards: t('common.cards', { count: cards }) }));
   }
 
   async function restore() {
@@ -93,18 +94,23 @@ export default function Settings() {
     try {
       const backup = parseBackup(await file.text());
       const { decks, cards, reviews } = backupCounts(backup);
-      const made = new Date(backup.exportedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+      const made = formatDate(new Date(backup.exportedAt), { day: true, month: 'long', year: true });
       const ok = await confirm(
-        'Replace everything with this backup?',
-        `Backup from ${made}: ${decks} decks, ${cards} cards, ${reviews} reviews. The cards in Cardly now will be deleted.`,
-        'Restore',
+        t('settings.restoreTitle'),
+        t('settings.restoreBody', {
+          date: made,
+          decks: t('common.decks', { count: decks }),
+          cards: t('common.cards', { count: cards }),
+          reviews: t('common.reviews', { count: reviews }),
+        }),
+        t('settings.restoreConfirm'),
       );
       if (!ok) return;
       await restoreBackup(db, backup);
       resyncReminders(db);
-      setDataStatus(`Restored ${decks} decks and ${cards} cards.`);
+      setDataStatus(t('settings.restored', { decks: t('common.decks', { count: decks }), cards: t('common.cards', { count: cards }) }));
     } catch (e) {
-      setDataStatus(e instanceof BackupError ? e.message : 'Couldn’t restore that file. Your cards haven’t changed.');
+      setDataStatus(e instanceof BackupError ? e.message : t('settings.restoreFailed'));
       if (!(e instanceof BackupError)) console.warn('Restore failed', e);
     }
   }
@@ -113,16 +119,16 @@ export default function Settings() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.topBar}>
-          <Pressable onPress={goBack} accessibilityRole="button" accessibilityLabel="Back" style={styles.iconButton}>
+          <Pressable onPress={goBack} accessibilityRole="button" accessibilityLabel={t('common.back')} style={styles.iconButton}>
             <Ionicons name="arrow-back" size={22} color={colors.ink} />
           </Pressable>
-          <Text style={type.title}>Settings</Text>
+          <Text style={type.title}>{t('common.settings')}</Text>
         </View>
 
         {/* Hidden in v1.0 — see accountsEnabled in src/lib/auth.ts. */}
         {accountsEnabled && (
           <View style={styles.section}>
-            <Text style={type.label}>ACCOUNT</Text>
+            <Text style={type.label}>{t('settings.account')}</Text>
             {session && account ? (
               <>
                 <View style={styles.accountRow}>
@@ -130,40 +136,50 @@ export default function Settings() {
                   <View style={{ flex: 1, minWidth: 0 }}>
                     {!!account.name && <Text style={type.bodySemi}>{account.name}</Text>}
                     <Text style={type.caption} numberOfLines={1}>
-                      {session.user.email ?? 'Private email'} · {providerName(session)}
+                      {session.user.email ?? t('settings.privateEmail')} · {providerName(session)}
                     </Text>
                   </View>
                 </View>
-                <Text style={type.caption}>Sync across devices is coming next. Your cards are on this phone.</Text>
+                <Text style={type.caption}>{t('settings.syncSoon')}</Text>
                 <Button
-                  title="Sign out"
+                  title={t('settings.signOut')}
                   variant="secondary"
                   onPress={async () => {
-                    if (await confirm('Sign out?', 'Your cards stay on this phone.', 'Sign out')) await signOut();
+                    if (await confirm(t('settings.signOutTitle'), t('settings.signOutBody'), t('settings.signOut'))) await signOut();
                   }}
                 />
               </>
             ) : (
               <>
                 <Text style={type.caption}>
-                  {`Optional. Sign in with ${appleSignInEnabled ? 'Apple, Google' : 'Google'} or email to get ready for syncing across your devices.`}
+                  {t('settings.signInPrompt', { providers: appleSignInEnabled ? 'Apple, Google' : 'Google' })}
                 </Text>
-                <Button title="Sign in" variant="secondary" disabled={session === undefined} onPress={() => router.push('/sign-in')} />
+                <Button title={t('settings.signIn')} variant="secondary" disabled={session === undefined} onPress={() => router.push('/sign-in')} />
               </>
             )}
           </View>
         )}
 
         <View style={styles.section}>
+          <Text style={type.label}>{t('settings.language')}</Text>
+          <Chips
+            options={LANGUAGE_OPTIONS}
+            value={language}
+            onChange={(lang) => lang !== language && setLanguage(lang)}
+          />
+          <Text style={type.caption}>{t('settings.languageNote')}</Text>
+        </View>
+
+        <View style={styles.section}>
           <Text style={type.label} nativeID="name-label">
-            YOUR NAME
+            {t('settings.name')}
           </Text>
           <TextInput
             value={draftName}
             onChangeText={setDraftName}
             onEndEditing={() => update({ name: draftName.trim() })}
             onBlur={() => update({ name: draftName.trim() })}
-            placeholder="Used in your daily greeting"
+            placeholder={t('settings.namePlaceholder')}
             placeholderTextColor={colors.muted}
             accessibilityLabelledBy="name-label"
             autoCapitalize="words"
@@ -172,7 +188,7 @@ export default function Settings() {
         </View>
 
         <View style={styles.section}>
-          <Text style={type.label}>NEW CARDS PER DECK, PER DAY</Text>
+          <Text style={type.label}>{t('settings.newCards')}</Text>
           <View style={styles.segment} accessibilityRole="radiogroup">
             {PACES.map((n) => {
               const on = n === newCardsPerDay;
@@ -195,14 +211,14 @@ export default function Settings() {
           <View style={styles.switchRow}>
             <View style={{ flex: 1, gap: 4 }}>
               <Text style={type.label} nativeID="reminder-label">
-                DAILY REMINDER
+                {t('settings.reminder')}
               </Text>
               <Text style={type.caption}>
                 {!remindersSupported
-                  ? 'Reminders work in the iOS and Android app.'
+                  ? t('settings.reminderUnsupported')
                   : reminderEnabled
-                    ? `At ${formatTime(reminderHour, reminderMinute)} on days you have cards due — skipped once you've studied.`
-                    : 'A gentle nudge on days you have cards due.'}
+                    ? t('settings.reminderOn', { time: formatTime(reminderHour, reminderMinute) })
+                    : t('settings.reminderOff')}
               </Text>
             </View>
             <Switch
@@ -217,21 +233,21 @@ export default function Settings() {
 
           {denied && (
             <View style={{ gap: spacing.sm }}>
-              <Text style={type.caption}>Notifications are turned off for Cardly. Allow them in your phone’s settings, then try again.</Text>
-              <Button title="Open settings" variant="secondary" onPress={() => Linking.openSettings()} />
+              <Text style={type.caption}>{t('settings.notificationsOff')}</Text>
+              <Button title={t('settings.openSettings')} variant="secondary" onPress={() => Linking.openSettings()} />
             </View>
           )}
 
           {reminderEnabled && (
             <>
               <View style={styles.stepper}>
-                <Pressable onPress={() => shiftTime(-15)} accessibilityRole="button" accessibilityLabel="15 minutes earlier" style={styles.stepButton}>
+                <Pressable onPress={() => shiftTime(-15)} accessibilityRole="button" accessibilityLabel={t('settings.earlier')} style={styles.stepButton}>
                   <Ionicons name="remove" size={22} color={colors.ink} />
                 </Pressable>
                 <Text style={styles.time} accessibilityLiveRegion="polite">
                   {formatTime(reminderHour, reminderMinute)}
                 </Text>
-                <Pressable onPress={() => shiftTime(15)} accessibilityRole="button" accessibilityLabel="15 minutes later" style={styles.stepButton}>
+                <Pressable onPress={() => shiftTime(15)} accessibilityRole="button" accessibilityLabel={t('settings.later')} style={styles.stepButton}>
                   <Ionicons name="add" size={22} color={colors.ink} />
                 </Pressable>
               </View>
@@ -245,7 +261,7 @@ export default function Settings() {
                 scroll
               />
               <Button
-                title={testSent ? 'Test sent — leave the app to see it' : 'Send a test reminder'}
+                title={testSent ? t('settings.testSent') : t('settings.sendTest')}
                 variant="secondary"
                 onPress={async () => {
                   await sendTestReminder();
@@ -257,10 +273,10 @@ export default function Settings() {
         </View>
 
         <View style={styles.section}>
-          <Text style={type.label}>LEARNING GOALS</Text>
-          <Text style={type.body}>{goals.length ? goals.map((g) => GOAL_NAMES[g]).join(' · ') : 'None selected'}</Text>
+          <Text style={type.label}>{t('settings.goals')}</Text>
+          <Text style={type.body}>{goals.length ? goals.map(goalName).join(' · ') : t('settings.noGoals')}</Text>
           <Button
-            title="Redo onboarding"
+            title={t('settings.redoOnboarding')}
             variant="secondary"
             onPress={() => {
               resetOnboarding();
@@ -271,13 +287,10 @@ export default function Settings() {
         </View>
 
         <View style={styles.section}>
-          <Text style={type.label}>YOUR DATA</Text>
-          <Text style={type.caption}>
-            Your cards are stored only on this phone. A backup is one file with every deck, card and review — keep it in Files, iCloud Drive or
-            Google Drive.
-          </Text>
-          <Button title="Back up now" variant="secondary" onPress={backUp} />
-          <Button title="Restore from a backup" variant="secondary" onPress={restore} />
+          <Text style={type.label}>{t('settings.data')}</Text>
+          <Text style={type.caption}>{t('settings.dataBody')}</Text>
+          <Button title={t('settings.backUp')} variant="secondary" onPress={backUp} />
+          <Button title={t('settings.restore')} variant="secondary" onPress={restore} />
           {dataStatus && (
             <Text style={type.caption} accessibilityLiveRegion="polite">
               {dataStatus}
@@ -286,10 +299,10 @@ export default function Settings() {
         </View>
 
         <View style={styles.section}>
-          <Text style={type.label}>SAMPLE DATA</Text>
-          <Text style={type.caption}>Sample decks show every card type: code, cloze and vocabulary. Resetting makes every card new again.</Text>
+          <Text style={type.label}>{t('settings.sample')}</Text>
+          <Text style={type.caption}>{t('settings.sampleBody')}</Text>
           <Button
-            title={samplesAdded ? 'Sample decks added ✓' : 'Add sample decks'}
+            title={samplesAdded ? t('settings.samplesAdded') : t('settings.addSamples')}
             variant="secondary"
             disabled={samplesAdded}
             onPress={async () => {
@@ -297,7 +310,7 @@ export default function Settings() {
               setSamplesAdded(true);
             }}
           />
-          <Button title={resetDone ? 'Progress reset ✓' : 'Reset study progress'} variant="danger" onPress={reset} />
+          <Button title={resetDone ? t('settings.progressReset') : t('settings.resetProgress')} variant="danger" onPress={reset} />
         </View>
       </ScrollView>
     </SafeAreaView>

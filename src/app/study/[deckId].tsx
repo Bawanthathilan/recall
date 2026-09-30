@@ -10,6 +10,7 @@ import { ProgressBar } from '@/components/ProgressBar';
 import { CardAnswer, cardChip, CardQuestion, wantsTypedAnswer } from '@/components/CardFace';
 import { getCardsByIds, getDecks, getStudyQueue, recordReview, setCardFlagged, undoReview } from '@/db/queries';
 import { formatInterval, GRADES, previewRatings, Rating, type Grade } from '@/lib/fsrs';
+import { t } from '@/i18n';
 import { goBack } from '@/lib/nav';
 import { checkTypedAnswer, parseNote, type Typed } from '@/lib/notes';
 import { useSettings } from '@/store/settings';
@@ -17,10 +18,10 @@ import { useStudySession } from '@/store/studySession';
 import { colors, fonts, radius, ratingColors, spacing, touchTarget, type } from '@/theme';
 
 const RATING_META: Record<Grade, { label: string; colors: { fg: string; bg: string } }> = {
-  [Rating.Again]: { label: 'Again', colors: ratingColors.again },
-  [Rating.Hard]: { label: 'Hard', colors: ratingColors.hard },
-  [Rating.Good]: { label: 'Good', colors: ratingColors.good },
-  [Rating.Easy]: { label: 'Easy', colors: ratingColors.easy },
+  [Rating.Again]: { label: t('study.again'), colors: ratingColors.again },
+  [Rating.Hard]: { label: t('study.hard'), colors: ratingColors.hard },
+  [Rating.Good]: { label: t('study.good'), colors: ratingColors.good },
+  [Rating.Easy]: { label: t('study.easy'), colors: ratingColors.easy },
 };
 
 export default function Study() {
@@ -105,14 +106,14 @@ export default function Study() {
         <View style={styles.doneIcon}>
           <Ionicons name="checkmark" size={34} color={colors.onAccent} />
         </View>
-        <Text style={[type.title, { marginTop: spacing.xl }]}>{reviewed ? 'Session complete' : 'Nothing due'}</Text>
+        <Text style={[type.title, { marginTop: spacing.xl }]}>{reviewed ? t('study.complete') : t('today.nothingDue')}</Text>
         <Text style={[type.body, styles.doneBody]}>
           {reviewed
-            ? `${reviewed} review${reviewed === 1 ? '' : 's'} done. FSRS has scheduled each card for the best moment to see it again.`
-            : 'There are no cards due here right now.'}
+            ? t('study.completeBody', { reviews: t('common.reviews', { count: reviewed }) })
+            : t('study.nothingDueBody')}
         </Text>
-        <Button title="Back to Today" onPress={goBack} style={styles.doneButton} />
-        {history.length > 0 && <Button title="Undo last rating" variant="secondary" onPress={undoLast} style={styles.doneButton} />}
+        <Button title={t('study.backToToday')} onPress={goBack} style={styles.doneButton} />
+        {history.length > 0 && <Button title={t('study.undo')} variant="secondary" onPress={undoLast} style={styles.doneButton} />}
       </SafeAreaView>
     );
   }
@@ -124,7 +125,7 @@ export default function Study() {
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={styles.topBar}>
-        <IconButton icon="close" label="End session" onPress={goBack} bordered />
+        <IconButton icon="close" label={t('study.end')} onPress={goBack} bordered />
         <View style={styles.progress}>
           <View style={styles.progressText}>
             <Text style={styles.progressLabel} numberOfLines={1}>
@@ -136,7 +137,7 @@ export default function Study() {
           </View>
           <ProgressBar value={reviewed / total} track={colors.line} />
         </View>
-        {history.length > 0 && <IconButton icon="arrow-undo-outline" label="Undo last rating" onPress={undoLast} bordered />}
+        {history.length > 0 && <IconButton icon="arrow-undo-outline" label={t('study.undo')} onPress={undoLast} bordered />}
       </View>
 
       <ScrollView style={styles.cardScroll} contentContainerStyle={styles.card}>
@@ -145,12 +146,12 @@ export default function Study() {
           <View style={{ flexDirection: 'row' }}>
             <IconButton
               icon="create-outline"
-              label="Edit card"
+              label={t('study.edit')}
               onPress={() => router.push({ pathname: '/card/[noteId]', params: { noteId: String(card.note_id) } })}
             />
             <IconButton
               icon={card.flagged ? 'flag' : 'flag-outline'}
-              label={card.flagged ? 'Unflag card' : 'Flag card'}
+              label={card.flagged ? t('study.unflag') : t('study.flag')}
               onPress={toggleFlag}
               color={card.flagged ? colors.accent : colors.muted}
             />
@@ -161,7 +162,7 @@ export default function Study() {
           <>
             <CardQuestion card={card} />
             <View style={{ flex: 1, minHeight: spacing.xl }} />
-            {!wantsTypedAnswer(card) && <Text style={styles.hint}>Think it through, then reveal.</Text>}
+            {!wantsTypedAnswer(card) && <Text style={styles.hint}>{t('study.hint')}</Text>}
           </>
         ) : (
           <CardAnswer card={card} typed={typed} />
@@ -174,11 +175,11 @@ export default function Study() {
             // `key` gives each card a fresh, empty input.
             <TypeAnswer key={card.id} expected={meaningOf(card.note_type, card.fields)} onCheck={reveal} />
           ) : (
-            <Button title="Show answer" onPress={() => reveal()} style={styles.showAnswer} />
+            <Button title={t('study.showAnswer')} onPress={() => reveal()} style={styles.showAnswer} />
           )
         ) : (
           <>
-            <Text style={styles.ask}>How well did you remember?</Text>
+            <Text style={styles.ask}>{t('study.ask')}</Text>
             <View style={styles.ratings}>
               {GRADES.map((g) => {
                 const meta = RATING_META[g];
@@ -188,7 +189,7 @@ export default function Study() {
                     key={g}
                     onPress={() => rate(g)}
                     accessibilityRole="button"
-                    accessibilityLabel={`${meta.label}, next review in ${interval}`}
+                    accessibilityLabel={t('study.ratingA11y', { rating: meta.label, interval })}
                     style={({ pressed }) => [styles.rating, { backgroundColor: meta.colors.bg }, pressed && styles.pressed]}
                   >
                     <Text style={[styles.ratingLabel, { color: meta.colors.fg }]}>{meta.label}</Text>
@@ -218,13 +219,13 @@ function TypeAnswer({ expected, onCheck }: { expected: string; onCheck: (typed?:
   return (
     <View style={{ gap: spacing.sm }}>
       <Text style={styles.typeLabel} nativeID="type-label">
-        Type the meaning
+        {t('study.typeMeaning')}
       </Text>
       <View style={styles.typeRow}>
         <TextInput
           value={value}
           onChangeText={setValue}
-          placeholder="e.g. to eat"
+          placeholder={t('study.typePlaceholder')}
           placeholderTextColor={colors.muted}
           accessibilityLabelledBy="type-label"
           autoCapitalize="none"
@@ -234,7 +235,7 @@ function TypeAnswer({ expected, onCheck }: { expected: string; onCheck: (typed?:
           style={styles.typeInput}
         />
         <Pressable onPress={check} accessibilityRole="button" style={({ pressed }) => [styles.checkButton, pressed && styles.pressed]}>
-          <Text style={styles.checkText}>{typedSomething ? 'Check' : 'Show'}</Text>
+          <Text style={styles.checkText}>{typedSomething ? t('study.check') : t('study.show')}</Text>
         </Pressable>
       </View>
     </View>

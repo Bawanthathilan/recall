@@ -1,6 +1,12 @@
 import { BricolageGrotesque_600SemiBold, BricolageGrotesque_700Bold } from '@expo-google-fonts/bricolage-grotesque';
 import { DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold, DMSans_700Bold } from '@expo-google-fonts/dm-sans';
 import { JetBrainsMono_400Regular, JetBrainsMono_500Medium } from '@expo-google-fonts/jetbrains-mono';
+import {
+  NotoSansSinhala_400Regular,
+  NotoSansSinhala_500Medium,
+  NotoSansSinhala_600SemiBold,
+  NotoSansSinhala_700Bold,
+} from '@expo-google-fonts/noto-sans-sinhala';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -10,11 +16,18 @@ import { useEffect } from 'react';
 
 import { ReminderSync } from '@/components/ReminderSync';
 import { DATABASE_NAME, migrateDbIfNeeded } from '@/db/schema';
+import { isSinhala } from '@/i18n';
 import { useSettingsHydrated } from '@/store/settings';
 import { colors } from '@/theme';
 
 // Keep the native splash visible until fonts and saved settings are loaded.
 SplashScreen.preventAutoHideAsync();
+
+// All Sinhala weights when the app is in Sinhala (theme.ts switches `fonts` to them). In English only
+// SemiBold, for the "සිංහල" language button on the first onboarding screen.
+const sinhalaFonts: Record<string, number> = isSinhala
+  ? { NotoSansSinhala_400Regular, NotoSansSinhala_500Medium, NotoSansSinhala_600SemiBold, NotoSansSinhala_700Bold }
+  : { NotoSansSinhala_600SemiBold };
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -26,6 +39,7 @@ export default function RootLayout() {
     DMSans_700Bold,
     JetBrainsMono_400Regular,
     JetBrainsMono_500Medium,
+    ...sinhalaFonts,
   });
   const settingsHydrated = useSettingsHydrated();
   const ready = (fontsLoaded || !!fontError) && settingsHydrated;

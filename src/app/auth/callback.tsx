@@ -4,6 +4,7 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { completeSignIn, type ReturnParams } from '@/lib/auth';
+import { t } from '@/i18n';
 import { colors, spacing, type } from '@/theme';
 
 /** Leave for Settings, closing the sign-in screen if it's still open underneath. */
@@ -32,14 +33,14 @@ export default function AuthCallback() {
     <View style={styles.screen} accessibilityLiveRegion="polite">
       {error ? (
         <>
-          <Text style={[type.section, { textAlign: 'center' }]}>Couldn’t sign you in</Text>
+          <Text style={[type.section, { textAlign: 'center' }]}>{t('auth.failed')}</Text>
           <Text style={[type.body, { textAlign: 'center', color: colors.muted }]}>{error}</Text>
-          <Button title="Back to Settings" variant="secondary" onPress={toSettings} />
+          <Button title={t('auth.backToSettings')} variant="secondary" onPress={toSettings} />
         </>
       ) : (
         <>
           <ActivityIndicator color={colors.ink} />
-          <Text style={type.body}>Signing you in…</Text>
+          <Text style={type.body}>{t('auth.signingIn')}</Text>
         </>
       )}
     </View>

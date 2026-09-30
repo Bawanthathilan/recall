@@ -19,6 +19,7 @@ import {
   useSession,
   verifyEmailCode,
 } from '@/lib/auth';
+import { t } from '@/i18n';
 import { goBack } from '@/lib/nav';
 import { colors, fonts, radius, spacing, touchTarget, type } from '@/theme';
 
@@ -48,7 +49,7 @@ export default function SignIn() {
       await task();
     } catch (e) {
       if (!(e instanceof AuthError)) console.warn('Sign-in failed', e);
-      setError(e instanceof AuthError ? e.message : 'Something went wrong. Check your connection and try again.');
+      setError(e instanceof AuthError ? e.message : t('signIn.failed'));
     } finally {
       setBusy(null);
     }
@@ -70,20 +71,20 @@ export default function SignIn() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <View style={styles.bar}>
           <Pressable onPress={goBack} accessibilityRole="button" hitSlop={8} style={styles.close}>
-            <Text style={styles.closeText}>Not now</Text>
+            <Text style={styles.closeText}>{t('signIn.notNow')}</Text>
           </Pressable>
         </View>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <Logo />
           <View style={{ gap: spacing.sm }}>
-            <Text style={type.title}>Sign in to Cardly</Text>
+            <Text style={type.title}>{t('signIn.title')}</Text>
             <Text style={[type.body, { color: colors.muted }]}>
-              Optional. An account will keep your decks and progress in sync across your devices. Your cards stay on this phone either way.
+              {t('signIn.body')}
             </Text>
           </View>
 
           {!authConfigured && (
-            <Text style={[type.caption, styles.notice]}>Sign-in isn’t set up in this build yet (missing Supabase settings).</Text>
+            <Text style={[type.caption, styles.notice]}>{t('signIn.notConfigured')}</Text>
           )}
 
           {appleSignInEnabled && (
@@ -100,17 +101,17 @@ export default function SignIn() {
             onPress={() => run('google', signInWithGoogle)}
             disabled={!!busy || !authConfigured}
             accessibilityRole="button"
-            accessibilityLabel="Continue with Google"
+            accessibilityLabel={t('signIn.google')}
             accessibilityState={{ disabled: !!busy || !authConfigured, busy: busy === 'google' }}
             style={({ pressed }) => [styles.provider, pressed && { backgroundColor: colors.ground }, !authConfigured && { opacity: 0.5 }]}
           >
             {busy === 'google' ? <ActivityIndicator color={colors.ink} /> : <Ionicons name="logo-google" size={20} color={colors.ink} />}
-            <Text style={styles.providerText}>Continue with Google</Text>
+            <Text style={styles.providerText}>{t('signIn.google')}</Text>
           </Pressable>
 
           <View style={styles.divider} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
             <View style={styles.line} />
-            <Text style={type.caption}>or use your email</Text>
+            <Text style={type.caption}>{t('signIn.orEmail')}</Text>
             <View style={styles.line} />
           </View>
 
@@ -121,7 +122,7 @@ export default function SignIn() {
                 onChangeText={setEmail}
                 placeholder="you@example.com"
                 placeholderTextColor={colors.muted}
-                accessibilityLabel="Email address"
+                accessibilityLabel={t('signIn.email')}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -132,7 +133,7 @@ export default function SignIn() {
                 style={styles.input}
               />
               <Button
-                title={busy === 'email' ? 'Sending…' : 'Email me a sign-in code'}
+                title={busy === 'email' ? t('signIn.sending') : t('signIn.sendCode')}
                 variant="primary"
                 disabled={!!busy || !authConfigured || !EMAIL_RE.test(email.trim())}
                 onPress={sendCode}
@@ -141,14 +142,16 @@ export default function SignIn() {
           ) : (
             <>
               <Text style={type.body} accessibilityLiveRegion="polite">
-                We sent a 6-digit code to <Text style={type.bodySemi}>{codeSentTo}</Text>. Enter it below, or tap the link in the email on this phone.
+                {t('signIn.codeSentBefore')}
+                <Text style={type.bodySemi}>{codeSentTo}</Text>
+                {t('signIn.codeSentAfter')}
               </Text>
               <TextInput
                 value={code}
                 onChangeText={(t) => setCode(t.replace(/\D/g, '').slice(0, 6))}
                 placeholder="123456"
                 placeholderTextColor={colors.muted}
-                accessibilityLabel="Sign-in code"
+                accessibilityLabel={t('signIn.code')}
                 keyboardType="number-pad"
                 autoComplete="one-time-code"
                 textContentType="oneTimeCode"
@@ -157,10 +160,10 @@ export default function SignIn() {
                 style={[styles.input, styles.codeInput]}
                 autoFocus
               />
-              <Button title={busy === 'code' ? 'Checking…' : 'Sign in'} disabled={!!busy || code.length !== 6} onPress={verify} />
+              <Button title={busy === 'code' ? t('signIn.checking') : t('settings.signIn')} disabled={!!busy || code.length !== 6} onPress={verify} />
               <View style={styles.row}>
-                <Button title="Change email" variant="secondary" style={{ flex: 1 }} onPress={() => setCodeSentTo(null)} />
-                <Button title="Send again" variant="secondary" style={{ flex: 1 }} disabled={!!busy} onPress={sendCode} />
+                <Button title={t('signIn.changeEmail')} variant="secondary" style={{ flex: 1 }} onPress={() => setCodeSentTo(null)} />
+                <Button title={t('signIn.sendAgain')} variant="secondary" style={{ flex: 1 }} disabled={!!busy} onPress={sendCode} />
               </View>
             </>
           )}

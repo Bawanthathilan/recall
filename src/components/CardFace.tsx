@@ -5,7 +5,8 @@ import { CodeBlock } from '@/components/CodeBlock';
 import { Markup } from '@/components/Markup';
 import type { StudyCard } from '@/db/queries';
 import { NOTE_TYPE_LABEL, parseNote, type NoteData, type Typed, type VocabFields } from '@/lib/notes';
-import { colors, fonts, ratingColors, spacing, tones, type } from '@/theme';
+import { t } from '@/i18n';
+import { colors, fonts, lineHeight, ratingColors, spacing, tones, type } from '@/theme';
 
 /** Chip in the card's top-left, as in the mockup: "Closures · Scope", "Vocabulary · Verb". */
 export function cardChip(note: NoteData, tags: string): { label: string; fg: string; bg: string } {
@@ -40,7 +41,7 @@ export function CardQuestion({ card }: { card: StudyCard }) {
       return card.ord === 1 ? (
         <View style={styles.centered}>
           <Text style={styles.meaningBig}>{note.fields.meaning}</Text>
-          <Text style={type.caption}>What’s the word?</Text>
+          <Text style={type.caption}>{t('cardFace.whatsTheWord')}</Text>
         </View>
       ) : (
         <>
@@ -125,7 +126,7 @@ function VocabWord({ fields, compact }: { fields: VocabFields; compact?: boolean
 function Example({ text }: { text: string }) {
   return (
     <View style={styles.example}>
-      <Text style={type.label}>EXAMPLE</Text>
+      <Text style={type.label}>{t('cardFace.example')}</Text>
       <Text style={styles.exampleText}>{text}</Text>
     </View>
   );
@@ -136,18 +137,18 @@ function TypedResult({ typed }: { typed: Typed }) {
   return (
     <View style={[styles.typed, { backgroundColor: c.bg }]} accessibilityLiveRegion="polite">
       <Ionicons name={typed.correct ? 'checkmark-circle' : 'close-circle'} size={20} color={c.fg} />
-      <Text style={[styles.typedText, { color: c.fg }]}>{typed.correct ? 'Correct' : `You typed “${typed.value}”`}</Text>
+      <Text style={[styles.typedText, { color: c.fg }]}>{typed.correct ? t('cardFace.correct') : t('cardFace.youTyped', { value: typed.value })}</Text>
     </View>
   );
 }
 
 const Divider = () => <View style={styles.divider} />;
-const AnswerLabel = () => <Text style={[type.label, { color: colors.success }]}>ANSWER</Text>;
+const AnswerLabel = () => <Text style={[type.label, { color: colors.success }]}>{t('cardFace.answer')}</Text>;
 
 const styles = StyleSheet.create({
-  questionSmall: { fontFamily: fonts.body, fontSize: 15, lineHeight: 21, color: colors.muted },
-  answer: { fontFamily: fonts.body, fontSize: 16, lineHeight: 24, color: colors.bodySoft },
-  clozeText: { fontFamily: fonts.body, fontSize: 21, lineHeight: 31, color: colors.ink },
+  questionSmall: { fontFamily: fonts.body, fontSize: 15, lineHeight: lineHeight(15, 21), color: colors.muted },
+  answer: { fontFamily: fonts.body, fontSize: 16, lineHeight: lineHeight(16, 24), color: colors.bodySoft },
+  clozeText: { fontFamily: fonts.body, fontSize: 21, lineHeight: lineHeight(21, 31), color: colors.ink },
   codeAnswer: { fontFamily: fonts.monoMedium, fontSize: 26, lineHeight: 34, color: colors.ink },
   divider: { height: 1, backgroundColor: colors.line },
   centered: { alignItems: 'center', gap: 6, paddingVertical: spacing.sm },
@@ -155,9 +156,9 @@ const styles = StyleSheet.create({
   word: { fontSize: 64, lineHeight: 72, fontWeight: '700', color: colors.ink, textAlign: 'center' },
   wordCompact: { fontSize: 40, lineHeight: 48 },
   meaningBig: { ...type.cardTitle, textAlign: 'center' },
-  meaning: { fontFamily: fonts.bodySemi, fontSize: 22, lineHeight: 28, color: colors.ink },
+  meaning: { fontFamily: fonts.bodySemi, fontSize: 22, lineHeight: lineHeight(22, 28), color: colors.ink },
   example: { alignSelf: 'stretch', padding: 14, borderRadius: 14, backgroundColor: colors.ground, gap: 4 },
-  exampleText: { fontSize: 16, lineHeight: 24, color: colors.ink },
+  exampleText: { fontSize: 16, lineHeight: lineHeight(16, 24), color: colors.ink },
   typed: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, padding: spacing.md, borderRadius: 12 },
   typedText: { fontFamily: fonts.bodySemi, fontSize: 15, flexShrink: 1 },
 });

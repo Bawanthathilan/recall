@@ -4,9 +4,12 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { monthGrid } from '@/lib/exam';
 import { dayKey } from '@/lib/stats';
+import { t } from '@/i18n';
+import { formatDate } from '@/i18n/dates';
 import { colors, fonts, radius, touchTarget } from '@/theme';
 
-const WEEKDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+/** Monday first, one short label per day. */
+const WEEKDAYS = t('datePicker.weekdays').split(' ');
 
 /**
  * A month calendar. Built by hand because the native date picker doesn't
@@ -22,18 +25,18 @@ export function DatePicker({ value, onChange, minKey }: { value: string | null; 
     setYear(d.getFullYear());
     setMonth(d.getMonth());
   };
-  const title = new Date(year, month, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  const title = formatDate(new Date(year, month, 1), { month: 'long', year: true });
 
   return (
     <View style={styles.box}>
       <View style={styles.header}>
-        <Pressable onPress={() => shift(-1)} accessibilityRole="button" accessibilityLabel="Previous month" style={styles.nav}>
+        <Pressable onPress={() => shift(-1)} accessibilityRole="button" accessibilityLabel={t('datePicker.previous')} style={styles.nav}>
           <Ionicons name="chevron-back" size={20} color={colors.ink} />
         </Pressable>
         <Text style={styles.title} accessibilityRole="header">
           {title}
         </Text>
-        <Pressable onPress={() => shift(1)} accessibilityRole="button" accessibilityLabel="Next month" style={styles.nav}>
+        <Pressable onPress={() => shift(1)} accessibilityRole="button" accessibilityLabel={t('datePicker.next')} style={styles.nav}>
           <Ionicons name="chevron-forward" size={20} color={colors.ink} />
         </Pressable>
       </View>
@@ -57,7 +60,7 @@ export function DatePicker({ value, onChange, minKey }: { value: string | null; 
                 onPress={() => onChange(key)}
                 disabled={disabled}
                 accessibilityRole="button"
-                accessibilityLabel={date.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}
+                accessibilityLabel={formatDate(date, { weekday: 'long', day: true, month: 'long' })}
                 accessibilityState={{ selected, disabled }}
                 style={styles.cell}
               >

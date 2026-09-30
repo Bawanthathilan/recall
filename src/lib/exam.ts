@@ -2,6 +2,7 @@
  * Exam pacing: will every new card be learned early enough to review it before
  * the exam? Pure functions, so they're easy to test.
  */
+import { t } from '@/i18n';
 import { startOfDay } from '@/lib/stats';
 
 /** Whole calendar days from today to "YYYY-MM-DD" (0 = today, negative = past). */
@@ -24,28 +25,28 @@ export type Pace = {
   suggestedPerDay?: number;
 };
 
-const days = (n: number) => (n === 1 ? '1 day' : `${n} days`);
-const cards = (n: number) => (n === 1 ? '1 card' : `${n} cards`);
+const days = (n: number) => t('common.days', { count: n });
+const cards = (n: number) => t('common.cards', { count: n });
 
 /**
  * Learn every new card by a "ready day" that leaves a review buffer before the
  * exam (up to 3 days, less when the exam is close), then check the daily rate.
  */
 export function examPace({ daysLeft, newRemaining, newPerDay }: { daysLeft: number; newRemaining: number; newPerDay: number }): Pace {
-  const when = daysLeft === 1 ? 'tomorrow' : `in ${days(daysLeft)}`;
+  const when = daysLeft === 1 ? t('exam.tomorrow') : t('exam.inDays', { days: days(daysLeft) });
 
   if (daysLeft < 0) {
-    return { status: 'past', daysLeft, label: 'Exam date passed', detail: 'The exam date has passed. Clear or change it in the deck settings.' };
+    return { status: 'past', daysLeft, label: t('exam.pastLabel'), detail: t('exam.pastDetail') };
   }
   if (daysLeft === 0) {
-    return { status: 'today', daysLeft, label: 'Exam today', detail: 'Exam today — a short review of anything due is the best use of your time. Good luck!' };
+    return { status: 'today', daysLeft, label: t('exam.todayLabel'), detail: t('exam.todayDetail') };
   }
   if (newRemaining === 0) {
     return {
       status: 'learned',
       daysLeft,
-      label: `Exam ${when} · all learned`,
-      detail: 'Every card is learned. Keep up your daily reviews until the exam.',
+      label: t('exam.learnedLabel', { when }),
+      detail: t('exam.learnedDetail'),
     };
   }
 
@@ -58,11 +59,8 @@ export function examPace({ daysLeft, newRemaining, newPerDay }: { daysLeft: numb
     return {
       status: 'on-track',
       daysLeft,
-      label: `Exam ${when} · on track`,
-      detail:
-        spare > 0
-          ? `At ${newPerDay} new cards a day you'll have learned every card ${days(spare)} before the exam.`
-          : `At ${newPerDay} new cards a day you'll learn the last cards just before the exam.`,
+      label: t('exam.onTrackLabel', { when }),
+      detail: spare > 0 ? t('exam.onTrackSpare', { perDay: newPerDay, days: days(spare) }) : t('exam.onTrackJust', { perDay: newPerDay }),
     };
   }
 
@@ -71,12 +69,13 @@ export function examPace({ daysLeft, newRemaining, newPerDay }: { daysLeft: numb
   return {
     status: 'behind',
     daysLeft,
-    label: `Exam ${when} · behind`,
+    label: t('exam.behindLabel', { when }),
     detail:
-      `At ${newPerDay} new cards a day, ${cards(leftOver)} will still be unlearned. ` +
+      t('exam.behindDetail', { perDay: newPerDay, cards: cards(leftOver) }) +
+      ' ' +
       (buffer > 0
-        ? `${suggestedPerDay} a day gets through them with ${days(buffer)} left to review.`
-        : `${suggestedPerDay} a day gets through them in time.`),
+        ? t('exam.behindBuffer', { perDay: suggestedPerDay, days: days(buffer) })
+        : t('exam.behindInTime', { perDay: suggestedPerDay })),
     suggestedPerDay,
   };
 }

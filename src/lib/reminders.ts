@@ -7,6 +7,7 @@
  * finish studying. That lets a reminder skip today once you've studied, skip
  * days with nothing due, and say how much is waiting.
  */
+import { t } from '@/i18n';
 import { addDays, startOfDay } from '@/lib/stats';
 
 export type PlannedReminder = { date: Date; title: string; body: string };
@@ -56,15 +57,12 @@ export function planReminders({
     if (i === 0 && studiedToday) return;
 
     const minutes = Math.max(1, Math.round((count * secondsPerCard) / 60));
-    const cards = count === 1 ? '1 card is' : `${count} cards are`;
     // Only today's reminder knows your streak for sure.
-    const title = i === 0 && streak > 0 ? `Keep your ${streak}-day streak going` : 'Time for a quick review';
-    plan.push({ date, title, body: `${cards} due — about ${minutes} min.` });
+    const title = i === 0 && streak > 0 ? t('reminder.streakTitle', { count: streak }) : t('reminder.title');
+    plan.push({ date, title, body: t('reminder.body', { count, minutes }) });
   });
   return plan;
 }
 
-/** "19:00" → "7:00 PM" in the user's locale. */
-export function formatTime(hour: number, minute: number) {
-  return new Date(2000, 0, 1, hour, minute).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-}
+/** "19:00" → "7:00 PM", or the Sinhala equivalent. */
+export { formatTime } from '@/i18n/dates';

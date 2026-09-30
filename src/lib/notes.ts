@@ -6,6 +6,8 @@
  * Pure TypeScript — no React, no database — so it's easy to unit-test.
  */
 
+import { t } from '@/i18n';
+
 export type NoteType = 'basic' | 'cloze' | 'code' | 'vocab';
 
 export type BasicFields = { front: string; back: string; reverse: boolean };
@@ -29,10 +31,10 @@ export type NoteData =
   | { type: 'vocab'; fields: VocabFields };
 
 export const NOTE_TYPE_LABEL: Record<NoteType, string> = {
-  basic: 'Basic',
-  cloze: 'Cloze',
-  code: 'Code',
-  vocab: 'Vocabulary',
+  basic: t('cardTypes.basic'),
+  cloze: t('cardTypes.cloze'),
+  code: t('cardTypes.code'),
+  vocab: t('cardTypes.vocab'),
 };
 
 const EMPTY: { [K in NoteType]: Extract<NoteData, { type: K }>['fields'] } = {
@@ -95,16 +97,16 @@ export function cardOrds(note: NoteData): number[] {
 export function validateNote(note: NoteData): string | null {
   switch (note.type) {
     case 'basic':
-      return !note.fields.front.trim() || !note.fields.back.trim() ? 'Fill in both sides' : null;
+      return !note.fields.front.trim() || !note.fields.back.trim() ? t('validate.bothSides') : null;
     case 'cloze':
-      if (!note.fields.text.trim()) return 'Write some text';
-      return clozeNumbers(note.fields.text).length ? null : 'Select a word and tap “Cloze” to hide it';
+      if (!note.fields.text.trim()) return t('validate.writeText');
+      return clozeNumbers(note.fields.text).length ? null : t('validate.selectCloze');
     case 'code':
       return !note.fields.prompt.trim() || !note.fields.code.trim() || !note.fields.answer.trim()
-        ? 'Add a prompt, code and answer'
+        ? t('validate.codeFields')
         : null;
     case 'vocab':
-      return !note.fields.word.trim() || !note.fields.meaning.trim() ? 'Add the word and its meaning' : null;
+      return !note.fields.word.trim() || !note.fields.meaning.trim() ? t('validate.vocabFields') : null;
   }
 }
 

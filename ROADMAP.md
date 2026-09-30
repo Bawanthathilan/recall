@@ -58,6 +58,22 @@ once there's an Apple Developer account ($99/yr).
 **iOS release (later)**
 - [ ] Apple Developer Program, TestFlight, App Store submission
 
+## Phase 5b — Sinhala (v1.1)  ← in progress
+App interface in English and Sinhala (සිංහල). English by default; Sinhala is picked in the app.
+- [x] i18next; `src/i18n/en.ts` is the source of truth, `si.ts` must match it
+      (TypeScript checks the keys; `src/i18n/__tests__` checks placeholders and leftover English)
+- [x] Every screen's text moved into the translation files (buttons, messages, errors, reminders, accessibility labels)
+- [x] Noto Sans Sinhala when the app is in Sinhala; taller line heights (`lineHeight()` in theme.ts), no negative letter spacing
+- [x] Language picker (English / සිංහල) in Settings and on the first onboarding screen; English until one is picked.
+      Changing language restarts the app
+- [x] Sinhala dates and times formatted in-app (`src/i18n/dates.ts`) — not every engine has Sinhala Intl data
+- [x] Checked on web: onboarding, Today, Study, Stats, Settings, switching both ways
+- [ ] Native speaker review of every Sinhala string on a phone (Expo Go: `npm run start:go`)
+- [ ] Check on Android: fonts, long words in buttons/tabs, notification text
+- [ ] Play listing translation (text ready in `store/listing.md`); Sinhala screenshots
+- Starter decks and sample data stay English (study content); Sinhala-medium decks could come later
+- English card text shown while the app is in Sinhala uses Noto Sans Sinhala's Latin letters (slightly wider spacing)
+
 ## Phase 6 — Language & media
 - [ ] Text-to-speech with 0.5× speed, Japanese fonts
 - [ ] Images and audio on cards, record pronunciation (new store build)

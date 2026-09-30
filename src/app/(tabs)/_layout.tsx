@@ -3,6 +3,7 @@ import { Redirect, router, Tabs } from 'expo-router';
 import { Pressable, StyleSheet, View, type ColorValue } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { t } from '@/i18n';
 import { useSettings } from '@/store/settings';
 import { colors, fonts, radius } from '@/theme';
 
@@ -20,7 +21,7 @@ function AddButton() {
       <Pressable
         onPress={() => router.push('/card/new')}
         accessibilityRole="button"
-        accessibilityLabel="Create card"
+        accessibilityLabel={t('tabs.createCard')}
         style={({ pressed }) => [styles.add, pressed && { backgroundColor: colors.accentPressed }]}
       >
         <Ionicons name="add" size={28} color={colors.onAccent} />
@@ -48,11 +49,11 @@ export default function TabsLayout() {
         tabBarLabelStyle: { fontFamily: fonts.bodySemi, fontSize: 11 },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Today', tabBarIcon: (p) => <TabIcon {...p} on="home" off="home-outline" /> }} />
-      <Tabs.Screen name="decks" options={{ title: 'Decks', tabBarIcon: (p) => <TabIcon {...p} on="albums" off="albums-outline" /> }} />
-      <Tabs.Screen name="add" options={{ title: 'Create', tabBarButton: () => <AddButton /> }} />
-      <Tabs.Screen name="stats" options={{ title: 'Stats', tabBarIcon: (p) => <TabIcon {...p} on="stats-chart" off="stats-chart-outline" /> }} />
-      <Tabs.Screen name="explore" options={{ title: 'Explore', tabBarIcon: (p) => <TabIcon {...p} on="compass" off="compass-outline" /> }} />
+      <Tabs.Screen name="index" options={{ title: t('tabs.today'), tabBarIcon: (p) => <TabIcon {...p} on="home" off="home-outline" /> }} />
+      <Tabs.Screen name="decks" options={{ title: t('tabs.decks'), tabBarIcon: (p) => <TabIcon {...p} on="albums" off="albums-outline" /> }} />
+      <Tabs.Screen name="add" options={{ title: t('tabs.create'), tabBarButton: () => <AddButton /> }} />
+      <Tabs.Screen name="stats" options={{ title: t('tabs.stats'), tabBarIcon: (p) => <TabIcon {...p} on="stats-chart" off="stats-chart-outline" /> }} />
+      <Tabs.Screen name="explore" options={{ title: t('tabs.explore'), tabBarIcon: (p) => <TabIcon {...p} on="compass" off="compass-outline" /> }} />
     </Tabs>
   );
 }

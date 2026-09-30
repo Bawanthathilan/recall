@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { ProgressBar } from '@/components/ProgressBar';
 import type { DeckSummary } from '@/db/queries';
+import { t } from '@/i18n';
 import { colors, fonts, radius, spacing, tones, type } from '@/theme';
 
 export function DeckTile({ icon, tone, size = 44 }: { icon: string; tone: DeckSummary['tone']; size?: number }) {
@@ -22,7 +23,7 @@ export function DeckRow({ deck, onPress }: { deck: DeckSummary; onPress: () => v
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${deck.name}, ${due} due, ${pct}% mastered${deck.pace ? `. ${deck.pace.label}` : ''}`}
+      accessibilityLabel={t('deckRow.a11y', { name: deck.name, due, mastered: pct }) + (deck.pace ? `. ${deck.pace.label}` : '')}
       style={({ pressed }) => [styles.row, pressed && { opacity: 0.9 }]}
     >
       <DeckTile icon={deck.icon} tone={deck.tone} />
@@ -31,12 +32,14 @@ export function DeckRow({ deck, onPress }: { deck: DeckSummary; onPress: () => v
           <Text style={[type.bodySemi, styles.name]} numberOfLines={1}>
             {deck.name}
           </Text>
-          {due > 0 && <Text style={styles.due}>{due} due</Text>}
+          {due > 0 && <Text style={styles.due}>{t('deckRow.due', { count: due })}</Text>}
         </View>
         <ProgressBar value={pct / 100} color={(tones[deck.tone] ?? tones.orange).fg} />
         {/* With an exam date, the mockup swaps this line for "Exam in 12 days · on track". */}
         <Text style={type.small}>
-          {deck.pace?.status === 'past' || !deck.pace ? `${deck.total} card${deck.total === 1 ? '' : 's'} · ${pct}% mastered` : deck.pace.label}
+          {deck.pace?.status === 'past' || !deck.pace
+            ? t('deckRow.progress', { cards: t('common.cards', { count: deck.total }), mastered: pct })
+            : deck.pace.label}
         </Text>
       </View>
     </Pressable>

@@ -9,12 +9,14 @@ import { Button } from '@/components/Button';
 import { DeckRow } from '@/components/DeckRow';
 import { resyncReminders } from '@/components/ReminderSync';
 import { getDeckSummaries, getSecondsPerReview, getStreak, type DeckSummary } from '@/db/queries';
+import { t } from '@/i18n';
+import { formatDate } from '@/i18n/dates';
 import { useSettings } from '@/store/settings';
 import { colors, fonts, radius, spacing, type } from '@/theme';
 
 function greeting(date: Date) {
   const h = date.getHours();
-  return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+  return h < 12 ? t('today.greetingMorning') : h < 18 ? t('today.greetingAfternoon') : t('today.greetingEvening');
 }
 
 export default function Today() {
@@ -45,7 +47,7 @@ export default function Today() {
   const due = n + l + r;
   const minutes = Math.max(1, Math.round((due * (data?.secsPerCard ?? 10)) / 60));
   const now = new Date();
-  const date = now.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' });
+  const date = formatDate(now, { weekday: 'long', day: true, month: 'short' });
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -54,16 +56,13 @@ export default function Today() {
           <View style={{ flex: 1, gap: 2 }}>
             <Text style={styles.date}>{date}</Text>
             <Text style={type.title} numberOfLines={2}>
-              {greeting(now)}
-              {name ? `, ${name}` : ''}
+              {name ? t('today.greetingName', { greeting: greeting(now), name }) : greeting(now)}
             </Text>
           </View>
           {!!data?.streak && (
-            <View style={styles.streak} accessibilityLabel={`${data.streak} day streak`}>
+            <View style={styles.streak} accessibilityLabel={t('today.streakA11y', { count: data.streak })}>
               <Ionicons name="flame" size={16} color={colors.accent} />
-              <Text style={styles.streakText}>
-                {data.streak} day{data.streak === 1 ? '' : 's'}
-              </Text>
+              <Text style={styles.streakText}>{t('common.days', { count: data.streak })}</Text>
             </View>
           )}
         </View>
@@ -71,18 +70,18 @@ export default function Today() {
         <View style={styles.hero}>
           <View style={styles.heroTop}>
             <View style={{ gap: 4 }}>
-              <Text style={styles.heroLabel}>Due today</Text>
+              <Text style={styles.heroLabel}>{t('today.dueToday')}</Text>
               <Text style={styles.heroNumber}>{data ? due : ' '}</Text>
             </View>
-            <Text style={styles.heroLabel}>{due ? `about ${minutes} min` : 'All caught up'}</Text>
+            <Text style={styles.heroLabel}>{due ? t('today.aboutMinutes', { count: minutes }) : t('today.allCaughtUp')}</Text>
           </View>
           <View style={styles.heroStats}>
-            <HeroStat label="New" value={n} />
-            <HeroStat label="Learning" value={l} />
-            <HeroStat label="Review" value={r} />
+            <HeroStat label={t('common.new')} value={n} />
+            <HeroStat label={t('common.learning')} value={l} />
+            <HeroStat label={t('common.review')} value={r} />
           </View>
           <Button
-            title={due ? 'Start review' : 'Nothing due'}
+            title={due ? t('today.startReview') : t('today.nothingDue')}
             variant="light"
             trailingIcon={due ? 'arrow-forward' : undefined}
             disabled={!due}
@@ -92,9 +91,9 @@ export default function Today() {
         </View>
 
         <View style={styles.sectionHeader}>
-          <Text style={type.section}>Your decks</Text>
+          <Text style={type.section}>{t('today.yourDecks')}</Text>
           <Link href="/deck/new" style={styles.link} accessibilityRole="button">
-            New deck
+            {t('common.newDeck')}
           </Link>
         </View>
         <View style={{ gap: 10 }}>

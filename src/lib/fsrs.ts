@@ -8,6 +8,8 @@ import {
   type RecordLogItem,
 } from 'ts-fsrs';
 
+import { t } from '@/i18n';
+
 export { Rating, State };
 export type { Grade };
 
@@ -84,11 +86,11 @@ export function previewRatings(row: FsrsColumns, now = new Date()): Preview {
 /** Human label for "how long until I see this again", e.g. "10 min", "2 days", "3 mo". */
 export function formatInterval(due: Date, now = new Date()): string {
   const minutes = Math.max(1, Math.round((due.getTime() - now.getTime()) / 60000));
-  if (minutes < 60) return `${minutes} min`;
+  if (minutes < 60) return t('interval.minutes', { count: minutes });
   const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours} hr`;
+  if (hours < 24) return t('interval.hours', { count: hours });
   const days = Math.round(hours / 24);
-  if (days < 30) return days === 1 ? '1 day' : `${days} days`;
-  if (days < 365) return `${+(days / 30).toFixed(1)} mo`;
-  return `${+(days / 365).toFixed(1)} yr`;
+  if (days < 30) return t('common.days', { count: days });
+  if (days < 365) return t('interval.months', { count: +(days / 30).toFixed(1) });
+  return t('interval.years', { count: +(days / 365).toFixed(1) });
 }

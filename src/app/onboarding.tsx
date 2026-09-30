@@ -6,24 +6,33 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
 import { Logo } from '@/components/Logo';
+import { isSinhala, setLanguage, t } from '@/i18n';
 import { useSettings, type Goal } from '@/store/settings';
-import { colors, fonts, radius, spacing, touchTarget, type } from '@/theme';
+import { colors, fonts, lineHeight, radius, spacing, touchTarget, type } from '@/theme';
 
-const GOALS: { id: Goal; icon: keyof typeof Ionicons.glyphMap; title: string; body: string }[] = [
-  { id: 'code', icon: 'code-slash', title: 'Programming', body: 'Code, interviews, certifications' },
-  { id: 'university', icon: 'school-outline', title: 'University', body: 'Lectures, formulas, diagrams' },
-  { id: 'language', icon: 'language', title: 'Languages', body: 'Vocab, listening, speaking' },
-  { id: 'exam', icon: 'calendar-outline', title: 'Exam prep', body: 'Study to a deadline' },
-  { id: 'medicine', icon: 'medkit-outline', title: 'Medicine', body: 'Anatomy, pharmacology' },
-  { id: 'other', icon: 'add-circle-outline', title: 'Something else', body: 'Hobbies, trivia, anything' },
-];
+const GOAL_ICONS: Record<Goal, keyof typeof Ionicons.glyphMap> = {
+  code: 'code-slash',
+  university: 'school-outline',
+  language: 'language',
+  exam: 'calendar-outline',
+  medicine: 'medkit-outline',
+  other: 'add-circle-outline',
+};
+const GOALS = (Object.keys(GOAL_ICONS) as Goal[]).map((id) => ({
+  id,
+  icon: GOAL_ICONS[id],
+  title: t(`goals.${id}.title`),
+  body: t(`goals.${id}.body`),
+}));
 
-const PACES = [
-  { n: 10, title: 'Relaxed', body: 'A few minutes a day' },
-  { n: 20, title: 'Steady', body: 'Recommended for most people' },
-  { n: 30, title: 'Intense', body: 'Faster progress, more reviews' },
-  { n: 50, title: 'Cramming', body: 'Exam soon — expect long sessions' },
-];
+const PACES = (
+  [
+    [10, 'relaxed'],
+    [20, 'steady'],
+    [30, 'intense'],
+    [50, 'cramming'],
+  ] as const
+).map(([n, key]) => ({ n, title: t(`onboarding.paces.${key}.title`), body: t(`onboarding.paces.${key}.body`) }));
 
 export default function Onboarding() {
   const saved = useSettings();
@@ -46,12 +55,25 @@ export default function Onboarding() {
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
             <Logo />
-            <Text style={styles.step}>Step {step} of 3</Text>
+            {step === 1 ? (
+              // Switch language before answering anything (the app restarts in the other language).
+              <Pressable
+                onPress={() => setLanguage(isSinhala ? 'en' : 'si')}
+                accessibilityRole="button"
+                accessibilityLabel={t('onboarding.switchLanguageA11y')}
+                style={styles.language}
+              >
+                <Ionicons name="language" size={16} color={colors.ink} />
+                <Text style={styles.languageText}>{t('onboarding.switchLanguage')}</Text>
+              </Pressable>
+            ) : (
+              <Text style={styles.step}>{t('onboarding.step', { step })}</Text>
+            )}
           </View>
 
           {step === 1 && (
             <>
-              <Intro title="What are you learning?" body="Pick all that apply. We'll suggest decks and card types that fit." />
+              <Intro title={t('onboarding.goalsTitle')} body={t('onboarding.goalsBody')} />
               <View style={styles.grid}>
                 {GOALS.map((g) => {
                   const on = goals.includes(g.id);
@@ -76,13 +98,13 @@ export default function Onboarding() {
 
           {step === 2 && (
             <>
-              <Intro title="What should we call you?" body="Just for your daily greeting. You can skip this." />
+              <Intro title={t('onboarding.nameTitle')} body={t('onboarding.nameBody')} />
               <TextInput
                 value={name}
                 onChangeText={setName}
-                placeholder="Your first name"
+                placeholder={t('onboarding.namePlaceholder')}
                 placeholderTextColor={colors.muted}
-                accessibilityLabel="Your first name"
+                accessibilityLabel={t('onboarding.namePlaceholder')}
                 autoFocus
                 autoCapitalize="words"
                 autoComplete="given-name"
@@ -95,7 +117,7 @@ export default function Onboarding() {
 
           {step === 3 && (
             <>
-              <Intro title="How many new cards a day?" body="Per deck. Reviews of cards you've already seen don't count toward this." />
+              <Intro title={t('onboarding.paceTitle')} body={t('onboarding.paceBody')} />
               <View style={{ gap: spacing.md }}>
                 {PACES.map((p) => {
                   const on = p.n === pace;
@@ -105,7 +127,7 @@ export default function Onboarding() {
                       onPress={() => setPace(p.n)}
                       accessibilityRole="radio"
                       accessibilityState={{ selected: on }}
-                      accessibilityLabel={`${p.n} new cards a day, ${p.title}. ${p.body}`}
+                      accessibilityLabel={t('onboarding.paceA11y', { count: p.n, title: p.title, body: p.body })}
                       style={[styles.pace, on && styles.goalOn]}
                     >
                       <Text style={styles.paceNumber}>{p.n}</Text>
@@ -123,13 +145,13 @@ export default function Onboarding() {
 
         <View style={styles.footer}>
           <Button
-            title={step === 1 && !goals.length ? 'Pick at least one' : step === 3 ? 'Start learning' : 'Continue'}
+            title={step === 1 && !goals.length ? t('onboarding.pickOne') : step === 3 ? t('onboarding.start') : t('onboarding.continue')}
             disabled={step === 1 && !goals.length}
             onPress={next}
           />
           {step > 1 ? (
             <Pressable onPress={() => setStep(step - 1)} accessibilityRole="button" style={styles.secondary}>
-              <Text style={styles.secondaryText}>Back</Text>
+              <Text style={styles.secondaryText}>{t('common.back')}</Text>
             </Pressable>
           ) : (
             <View style={styles.secondary} />
@@ -156,6 +178,19 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 24, paddingTop: spacing.xl, paddingBottom: spacing.xl, gap: 28 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   step: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colors.muted },
+  language: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    minHeight: touchTarget,
+    paddingHorizontal: 14,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.surface,
+  },
+  // Always the other language's own script, so it's readable to whoever needs it.
+  languageText: { fontFamily: isSinhala ? fonts.bodySemi : 'NotoSansSinhala_600SemiBold', fontSize: 14, color: colors.ink },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
   goal: {
     // Two columns: each ~half the width; flexGrow absorbs the gap.
@@ -171,7 +206,7 @@ const styles = StyleSheet.create({
   },
   goalOn: { backgroundColor: colors.accentSoft, borderColor: colors.accent },
   goalTitle: { fontFamily: fonts.bodySemi, fontSize: 16, color: colors.ink },
-  goalBody: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, color: colors.muted },
+  goalBody: { fontFamily: fonts.body, fontSize: 13, lineHeight: lineHeight(13, 18), color: colors.muted },
   input: {
     ...type.body,
     fontSize: 18,
