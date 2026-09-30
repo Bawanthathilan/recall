@@ -1,7 +1,7 @@
 /**
- * Anki cards (and some CSV exports) are HTML. Recall's cards use a small markup
+ * Anki cards (and some CSV exports) are HTML. Cardly's cards use a small markup
  * instead (src/lib/markup.ts): **bold**, `code`, ``` code blocks ```, line breaks.
- * This converts the parts Recall can show and drops the rest. Pure, so it's tested.
+ * This converts the parts Cardly can show and drops the rest. Pure, so it's tested.
  */
 
 const ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', ndash: '–', mdash: '—', hellip: '…', rsquo: '’', lsquo: '‘', rdquo: '”', ldquo: '“' };

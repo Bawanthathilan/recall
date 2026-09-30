@@ -1,5 +1,5 @@
 /**
- * Draws Recall's app icons from the same shape as <Logo /> (src/components/Logo.tsx):
+ * Draws Cardly's app icons from the same shape as <Logo /> (src/components/Logo.tsx):
  * an ink square with a tilted card outline. No image tools needed — each pixel's
  * colour comes from a signed distance function, and the PNG is encoded by hand.
  *

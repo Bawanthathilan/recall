@@ -13,7 +13,7 @@ function toSettings() {
 }
 
 /**
- * Where Google sign-in and email links come back to (recall://auth/callback?code=…).
+ * Where Google sign-in and email links come back to (cardly://auth/callback?code=…).
  * On iPhone the in-app browser usually hands the code straight to the sign-in
  * screen and this page never shows; Android, web and email links land here.
  */

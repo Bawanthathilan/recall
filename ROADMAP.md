@@ -1,4 +1,4 @@
-# Recall roadmap
+# Cardly roadmap
 
 Design source: Claude Design artifact "Flashcard App UI" (7 screens).
 Phases 1–4 run in Expo Go. From Phase 5 (shipping) on, the app uses development builds:
@@ -34,19 +34,29 @@ code (e.g. audio recording) need a new store build. Phase 8 adds a backend.
 - [x] Exam deadlines per deck (migration v4), per-deck new cards/day, pace card with "Use N a day"
 - [x] Daily reminder notifications (next 7 days planned locally; skips days you've studied or have nothing due)
 
-## Phase 5 — Ship v1.0  ← next
-Local-only app, no backend. Goal: real people using it.
+## Phase 5 — Ship v1.0 (Android first)  ← next
+Local-only app, no backend. Goal: real people using it — on Google Play first; iOS follows
+once there's an Apple Developer account ($99/yr).
 - [x] Hide unfinished UI (Explore returned in Phase 7; Settings is behind the gear on Decks)
 - [x] App icon, splash, favicon, notification icon (`node scripts/make-icons.mjs`)
-- [x] Bundle ID `com.bawantha.recall`, iPhone only, expo-notifications plugin, `eas.json`
+- [x] Package / bundle ID `com.bawantha.cardly`, expo-notifications plugin, `eas.json`
       (versions managed by EAS, build numbers auto-increment)
-- [x] Development build running on the iOS 27 Simulator (scene life cycle via `plugins/withSceneLifecycle.js`)
-- [ ] Development build on Android
-- [ ] Crash reporting, E2E tests of the main flows, large-deck performance (10,000+ cards)
-- [ ] Privacy policy (data stays on the device), store listings and screenshots
-- [ ] TestFlight + Play internal testing, then store submission
 - [x] EAS Update configured (channels per build profile; runtime = fingerprint of the native code)
-- [ ] First `eas update` published to TestFlight testers
+- [x] iOS: development build running on the iOS 27 Simulator (`plugins/withSceneLifecycle.js`)
+
+**Android release**
+- [ ] Android build installed on a phone or emulator (EAS `preview` APK — free, no store needed)
+- [ ] Android pass: back button, edge-to-edge, keyboard, notifications permission (Android 13+),
+      Google sign-in return link, file picker / share sheet, backup
+- [ ] Crash reporting, large-deck performance (10,000+ cards)
+- [ ] Google Play Console account ($25 once) and identity verification
+- [ ] Privacy policy page, Data safety form, store listing, screenshots, content rating
+- [ ] Closed testing: new personal Play accounts need 12 testers for 14 days before production
+- [ ] Production release on Google Play (AAB from `eas build -p android --profile production`)
+- [ ] First `eas update` to Play testers
+
+**iOS release (later)**
+- [ ] Apple Developer Program, TestFlight, App Store submission
 
 ## Phase 6 — Language & media
 - [ ] Text-to-speech with 0.5× speed, Japanese fonts
@@ -56,7 +66,7 @@ Local-only app, no backend. Goal: real people using it.
 ## Phase 7 — Import, export, Explore  ← in progress
 - [x] Backup & restore: whole database as one JSON file (Settings → Your data), all-or-nothing restore
 - [x] CSV / tab-separated import (Excel, Sheets, Quizlet, Anki plain-text export): column picker, clozes detected
-- [x] Anki .apkg import: old and new (zstd) formats, basic/reversed/cloze, HTML → Recall markup,
+- [x] Anki .apkg import: old and new (zstd) formats, basic/reversed/cloze, HTML → Cardly markup,
       deck hierarchy, tags, review progress kept (Anki FSRS state when present)
 - [x] Explore tab: 12 starter decks, "For you" by onboarding goal, Import entry point
 - [ ] Test on a phone: file picker, share sheet, a real Anki deck (needs Expo Go or a new build)
@@ -87,5 +97,6 @@ Local-only app, no backend. Goal: real people using it.
 - Exam decks: FSRS may still schedule a review after the exam date; an "exam mode" that caps intervals could come later
 - Reminders are local notifications (work in Expo Go). Android shows them with the card icon in the accent colour
 - iOS 27 requires the scene life cycle; Expo 57's template doesn't adopt it yet, so `plugins/withSceneLifecycle.js` does. Remove after an SDK upgrade that includes it
-- Bundle ID `com.bawantha.recall` can still change until the first store upload — after that it's permanent
+- Renamed Recall → Cardly before any release: package `com.bawantha.cardly`, scheme `cardly://`. Internal names stay (`recall.db`, `recall-settings`, backup tag `recall-backup`, EAS slug `recall`) so data, backups and the EAS project keep working
+- Package ID `com.bawantha.cardly` is permanent after the first store upload
 - iPhone only for v1.0 (`supportsTablet: false`): an iPad version needs its own screenshots and layout checks

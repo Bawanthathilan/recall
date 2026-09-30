@@ -2,14 +2,14 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { colors, fonts } from '@/theme';
 
-/** Ink rounded square with a tilted card outline, plus the "Recall" wordmark. */
+/** Ink rounded square with a tilted card outline, plus the "Cardly" wordmark. */
 export function Logo() {
   return (
-    <View style={styles.row} accessibilityRole="header" accessibilityLabel="Recall">
+    <View style={styles.row} accessibilityRole="header" accessibilityLabel="Cardly">
       <View style={styles.mark}>
         <View style={styles.card} />
       </View>
-      <Text style={styles.word}>Recall</Text>
+      <Text style={styles.word}>Cardly</Text>
     </View>
   );
 }

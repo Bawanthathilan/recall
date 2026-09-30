@@ -181,7 +181,7 @@ function AnkiOptions({ fileName, collection, onImport }: { fileName: string; col
         <View style={styles.note}>
           {result.lostMedia > 0 && <Text style={type.caption}>{`${plural(result.lostMedia, 'note')} had images or audio — imported with the text only.`}</Text>}
           {result.skipped > 0 && (
-            <Text style={type.caption}>{`${plural(result.skipped, 'note')} can’t be shown in Recall yet (image occlusion, or only a picture) and will be skipped.`}</Text>
+            <Text style={type.caption}>{`${plural(result.skipped, 'note')} can’t be shown in Cardly yet (image occlusion, or only a picture) and will be skipped.`}</Text>
           )}
         </View>
       )}
