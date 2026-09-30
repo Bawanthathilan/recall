@@ -40,7 +40,7 @@ describe('backup and restore', () => {
 
   it('rejects files that aren’t backups, or come from a newer app', async () => {
     expect(() => parseBackup('not json')).toThrow(BackupError);
-    expect(() => parseBackup('{"format":"something-else"}')).toThrow('isn’t a Recall backup');
+    expect(() => parseBackup('{"format":"something-else"}')).toThrow('isn’t a Cardly backup');
     const { db } = await freshDb();
     const future = { ...(await createBackup(db)), schema: 999 };
     expect(() => parseBackup(JSON.stringify(future))).toThrow('newer version');

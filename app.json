@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Recall",
+    "name": "Cardly",
     "slug": "recall",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,21 +8,26 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.bawantha.recall",
+      "bundleIdentifier": "com.bawantha.cardly",
       "config": {
         "usesNonExemptEncryption": false
       },
       "usesAppleSignIn": true
     },
     "android": {
-      "package": "com.bawantha.recall",
+      "package": "com.bawantha.cardly",
       "adaptiveIcon": {
         "backgroundColor": "#1C1B19",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "blockedPermissions": [
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -52,7 +57,7 @@
       "expo-apple-authentication",
       "./plugins/withSceneLifecycle.js"
     ],
-    "scheme": "recall",
+    "scheme": "cardly",
     "experiments": {
       "typedRoutes": true
     },

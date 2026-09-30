@@ -12,7 +12,7 @@ import { resyncReminders } from '@/components/ReminderSync';
 import { backupCounts, backupFileName, BackupError, createBackup, parseBackup, restoreBackup } from '@/db/backup';
 import { resetAllProgress } from '@/db/queries';
 import { seedSampleDecks } from '@/db/seed';
-import { appleSignInEnabled, profile, providerName, signOut, useSession } from '@/lib/auth';
+import { accountsEnabled, appleSignInEnabled, profile, providerName, signOut, useSession } from '@/lib/auth';
 import { confirm } from '@/lib/confirm';
 import { goBack } from '@/lib/nav';
 import { pickFile, saveFile } from '@/lib/files';
@@ -96,7 +96,7 @@ export default function Settings() {
       const made = new Date(backup.exportedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
       const ok = await confirm(
         'Replace everything with this backup?',
-        `Backup from ${made}: ${decks} decks, ${cards} cards, ${reviews} reviews. The cards in Recall now will be deleted.`,
+        `Backup from ${made}: ${decks} decks, ${cards} cards, ${reviews} reviews. The cards in Cardly now will be deleted.`,
         'Restore',
       );
       if (!ok) return;
@@ -119,37 +119,40 @@ export default function Settings() {
           <Text style={type.title}>Settings</Text>
         </View>
 
-        <View style={styles.section}>
-          <Text style={type.label}>ACCOUNT</Text>
-          {session && account ? (
-            <>
-              <View style={styles.accountRow}>
-                <Avatar name={account.name || session.user.email || '?'} photoUrl={account.photoUrl} size={touchTarget + 8} />
-                <View style={{ flex: 1, minWidth: 0 }}>
-                  {!!account.name && <Text style={type.bodySemi}>{account.name}</Text>}
-                  <Text style={type.caption} numberOfLines={1}>
-                    {session.user.email ?? 'Private email'} · {providerName(session)}
-                  </Text>
+        {/* Hidden in v1.0 — see accountsEnabled in src/lib/auth.ts. */}
+        {accountsEnabled && (
+          <View style={styles.section}>
+            <Text style={type.label}>ACCOUNT</Text>
+            {session && account ? (
+              <>
+                <View style={styles.accountRow}>
+                  <Avatar name={account.name || session.user.email || '?'} photoUrl={account.photoUrl} size={touchTarget + 8} />
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    {!!account.name && <Text style={type.bodySemi}>{account.name}</Text>}
+                    <Text style={type.caption} numberOfLines={1}>
+                      {session.user.email ?? 'Private email'} · {providerName(session)}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-              <Text style={type.caption}>Sync across devices is coming next. Your cards are on this phone.</Text>
-              <Button
-                title="Sign out"
-                variant="secondary"
-                onPress={async () => {
-                  if (await confirm('Sign out?', 'Your cards stay on this phone.', 'Sign out')) await signOut();
-                }}
-              />
-            </>
-          ) : (
-            <>
-              <Text style={type.caption}>
-                {`Optional. Sign in with ${appleSignInEnabled ? 'Apple, Google' : 'Google'} or email to get ready for syncing across your devices.`}
-              </Text>
-              <Button title="Sign in" variant="secondary" disabled={session === undefined} onPress={() => router.push('/sign-in')} />
-            </>
-          )}
-        </View>
+                <Text style={type.caption}>Sync across devices is coming next. Your cards are on this phone.</Text>
+                <Button
+                  title="Sign out"
+                  variant="secondary"
+                  onPress={async () => {
+                    if (await confirm('Sign out?', 'Your cards stay on this phone.', 'Sign out')) await signOut();
+                  }}
+                />
+              </>
+            ) : (
+              <>
+                <Text style={type.caption}>
+                  {`Optional. Sign in with ${appleSignInEnabled ? 'Apple, Google' : 'Google'} or email to get ready for syncing across your devices.`}
+                </Text>
+                <Button title="Sign in" variant="secondary" disabled={session === undefined} onPress={() => router.push('/sign-in')} />
+              </>
+            )}
+          </View>
+        )}
 
         <View style={styles.section}>
           <Text style={type.label} nativeID="name-label">
@@ -214,7 +217,7 @@ export default function Settings() {
 
           {denied && (
             <View style={{ gap: spacing.sm }}>
-              <Text style={type.caption}>Notifications are turned off for Recall. Allow them in your phone’s settings, then try again.</Text>
+              <Text style={type.caption}>Notifications are turned off for Cardly. Allow them in your phone’s settings, then try again.</Text>
               <Button title="Open settings" variant="secondary" onPress={() => Linking.openSettings()} />
             </View>
           )}
@@ -283,8 +286,8 @@ export default function Settings() {
         </View>
 
         <View style={styles.section}>
-          <Text style={type.label}>TESTING</Text>
-          <Text style={type.caption}>Sample decks include Code, Cloze and Vocabulary cards. Reset makes every card new again.</Text>
+          <Text style={type.label}>SAMPLE DATA</Text>
+          <Text style={type.caption}>Sample decks show every card type: code, cloze and vocabulary. Resetting makes every card new again.</Text>
           <Button
             title={samplesAdded ? 'Sample decks added ✓' : 'Add sample decks'}
             variant="secondary"

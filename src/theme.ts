@@ -1,5 +1,5 @@
 /**
- * Recall design tokens, taken from the Claude Design mockup "Flashcard App UI".
+ * Cardly design tokens, taken from the Claude Design mockup "Flashcard App UI".
  *
  * Every colour, font, radius and spacing value used by the UI lives here, so
  * screens never hard-code hex values. Change the look of the app from this file.

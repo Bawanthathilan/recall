@@ -1,12 +1,12 @@
 /**
- * Converting Anki decks into Recall notes. Pure — the database side is in
+ * Converting Anki decks into Cardly notes. Pure — the database side is in
  * src/db/imports.ts — so the conversion rules are tested.
  *
  * An .apkg file is a zip. Inside is the Anki collection, a SQLite database:
  *  - collection.anki2 / .anki21: plain SQLite (older Anki, or "support older versions" ticked)
  *  - collection.anki21b: SQLite compressed with zstd (Anki 2.1.50+). Files with this
  *    also contain a stub collection.anki2 that only says "please update Anki".
- * Media files are in the zip too; Recall skips them until it supports images and audio.
+ * Media files are in the zip too; Cardly skips them until it supports images and audio.
  */
 import { unzipSync } from 'fflate';
 import { decompress } from 'fzstd';
@@ -95,13 +95,13 @@ export type AnkiCollection = {
 export type ImportedNote = {
   note: NoteData;
   tags: string[];
-  /** Scheduling to keep, by Recall card ord. Cards not listed start as new. */
+  /** Scheduling to keep, by Cardly card ord. Cards not listed start as new. */
   schedule: Map<number, FsrsColumns>;
 };
 export type ImportedDeck = { name: string; notes: ImportedNote[] };
 export type ConvertResult = {
   decks: ImportedDeck[];
-  /** Notes Recall can't show: image occlusion, or nothing left once images/audio are removed. */
+  /** Notes Cardly can't show: image occlusion, or nothing left once images/audio are removed. */
   skipped: number;
   /** Imported notes that lost an image or sound. */
   lostMedia: number;
@@ -165,20 +165,20 @@ export function convertCollection(col: AnkiCollection, { keepProgress }: { keepP
     const extra = rest.filter(Boolean).join('\n\n');
 
     let note: NoteData;
-    // Recall ord for each Anki card ord. Anki cloze card 0 hides c1, card 1 hides c2…
-    let toRecallOrd: (ankiOrd: number) => number;
+    // Cardly ord for each Anki card ord. Anki cloze card 0 hides c1, card 1 hides c2…
+    let toCardlyOrd: (ankiOrd: number) => number;
     if (model.kind === 'cloze') {
       if (first.includes('image-occlusion:')) {
         skipped++;
         continue;
       }
       note = { type: 'cloze', fields: { text: first, extra } };
-      toRecallOrd = (o) => o + 1;
+      toCardlyOrd = (o) => o + 1;
     } else {
       // Basic: first field is the front, the rest the back. A second template means "and reversed".
       const reverse = model.templateCount >= 2 && cards.some((c) => c.ord === 1);
       note = { type: 'basic', fields: { front: first, back: extra, reverse } };
-      toRecallOrd = (o) => o;
+      toCardlyOrd = (o) => o;
     }
     if (validateNote(note)) {
       skipped++;
@@ -191,7 +191,7 @@ export function convertCollection(col: AnkiCollection, { keepProgress }: { keepP
     if (keepProgress) {
       for (const c of cards) {
         const s = ankiSchedule(c, col.crt);
-        const ord = toRecallOrd(c.ord);
+        const ord = toCardlyOrd(c.ord);
         if (s && ords.has(ord)) schedule.set(ord, s);
       }
     }

@@ -1,6 +1,6 @@
 /**
  * Database side of importing: reading an Anki collection, and saving imported
- * notes into Recall. The conversion rules are in src/lib/anki.ts and csv.ts.
+ * notes into Cardly. The conversion rules are in src/lib/anki.ts and csv.ts.
  */
 import { deserializeDatabaseAsync, type SQLiteDatabase } from 'expo-sqlite';
 
@@ -17,7 +17,7 @@ import {
   type ImportedDeck,
 } from '@/lib/anki';
 
-/** Opens an .apkg's collection as an in-memory database and reads what Recall needs. */
+/** Opens an .apkg's collection as an in-memory database and reads what Cardly needs. */
 export async function readApkg(apkg: Uint8Array): Promise<AnkiCollection> {
   const anki = await deserializeDatabaseAsync(extractCollection(apkg));
   try {

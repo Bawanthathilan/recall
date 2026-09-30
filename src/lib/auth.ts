@@ -1,5 +1,5 @@
 /**
- * Accounts, via Supabase Auth. Signing in is optional: Recall works fully
+ * Accounts, via Supabase Auth. Signing in is optional: Cardly works fully
  * without an account; an account is what sync (Phase 8) will hang off.
  *
  * Ways to sign in:
@@ -28,8 +28,16 @@ import { useSettings } from '@/store/settings';
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const key = process.env.EXPO_PUBLIC_SUPABASE_KEY;
 
-/** False until .env.local has the Supabase URL and key (see .env.example). */
-export const authConfigured = !!url && !!key;
+/**
+ * Accounts are off in v1.0. Google Play requires in-app and web account deletion
+ * for any app that creates accounts, and accounts don't do anything until sync
+ * ships — so they're switched on together (EXPO_PUBLIC_ACCOUNTS=true in .env.local).
+ * While off, no Supabase client is created: the app makes no network calls.
+ */
+export const accountsEnabled = process.env.EXPO_PUBLIC_ACCOUNTS === 'true';
+
+/** False while accounts are off, or until .env.local has the Supabase URL and key (see .env.example). */
+export const authConfigured = accountsEnabled && !!url && !!key;
 export const appleSignInEnabled = Platform.OS === 'ios' && process.env.EXPO_PUBLIC_APPLE_SIGN_IN === 'true';
 
 export const supabase = authConfigured
@@ -110,7 +118,7 @@ export function providerName(s: Session) {
 
 // ─── Signing in ─────────────────────────────────────────────────────────────
 
-/** Where browser sign-ins and email links return to: recall://auth/callback, exp://…/--/auth/callback in Expo Go. */
+/** Where browser sign-ins and email links return to: cardly://auth/callback, exp://…/--/auth/callback in Expo Go. */
 export const redirectUrl = () => Linking.createURL('auth/callback');
 
 function client() {

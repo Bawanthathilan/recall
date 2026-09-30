@@ -10,6 +10,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 import { MIGRATIONS } from './schema';
 
+// The app was called Recall when this format was defined; keep the tag so old backups still restore.
 export const BACKUP_FORMAT = 'recall-backup';
 const BACKUP_VERSION = 1;
 
@@ -33,26 +34,26 @@ export async function createBackup(db: SQLiteDatabase, now = new Date()): Promis
   return { format: BACKUP_FORMAT, version: BACKUP_VERSION, schema: MIGRATIONS.length, exportedAt: now.toISOString(), tables };
 }
 
-/** "recall-backup-2026-09-23.json" */
+/** "cardly-backup-2026-09-23.json" */
 export function backupFileName(now = new Date()) {
   const pad = (n: number) => String(n).padStart(2, '0');
-  return `recall-backup-${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}.json`;
+  return `cardly-backup-${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}.json`;
 }
 
 /** A message meant for the person restoring, not a crash. */
 export class BackupError extends Error {}
 
-/** Checks that `text` is a Recall backup this version can restore. */
+/** Checks that `text` is a Cardly backup this version can restore. */
 export function parseBackup(text: string): Backup {
   let data: Partial<Backup>;
   try {
     data = JSON.parse(text);
   } catch {
-    throw new BackupError('This file isn’t a Recall backup (it isn’t valid JSON).');
+    throw new BackupError('This file isn’t a Cardly backup (it isn’t valid JSON).');
   }
-  if (data?.format !== BACKUP_FORMAT) throw new BackupError('This file isn’t a Recall backup.');
+  if (data?.format !== BACKUP_FORMAT) throw new BackupError('This file isn’t a Cardly backup.');
   if ((data.version ?? 0) > BACKUP_VERSION || (data.schema ?? 0) > MIGRATIONS.length) {
-    throw new BackupError('This backup was made by a newer version of Recall. Update the app, then try again.');
+    throw new BackupError('This backup was made by a newer version of Cardly. Update the app, then try again.');
   }
   for (const t of TABLES) {
     if (!Array.isArray(data.tables?.[t])) throw new BackupError('This backup is incomplete or damaged.');

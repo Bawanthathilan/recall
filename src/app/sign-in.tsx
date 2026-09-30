@@ -1,5 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as AppleAuthentication from 'expo-apple-authentication';
+import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/Button';
 import { Logo } from '@/components/Logo';
 import {
+  accountsEnabled,
   appleSignInEnabled,
   AuthError,
   authConfigured,
@@ -61,6 +63,8 @@ export default function SignIn() {
     });
   const verify = () => codeSentTo && run('code', () => verifyEmailCode(codeSentTo, code.trim()));
 
+  if (!accountsEnabled) return <Redirect href="/settings" />;
+
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
@@ -72,7 +76,7 @@ export default function SignIn() {
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <Logo />
           <View style={{ gap: spacing.sm }}>
-            <Text style={type.title}>Sign in to Recall</Text>
+            <Text style={type.title}>Sign in to Cardly</Text>
             <Text style={[type.body, { color: colors.muted }]}>
               Optional. An account will keep your decks and progress in sync across your devices. Your cards stay on this phone either way.
             </Text>
