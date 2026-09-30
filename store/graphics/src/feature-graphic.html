@@ -1,0 +1,57 @@
+<!doctype html>
+<!-- Play feature graphic, 1024×500. Rendered to ../feature-graphic.jpg by store/render.sh. -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: Bricolage; src: url(../../../node_modules/@expo-google-fonts/bricolage-grotesque/700Bold/BricolageGrotesque_700Bold.ttf); }
+  @font-face { font-family: DMSans; src: url(../../../node_modules/@expo-google-fonts/dm-sans/500Medium/DMSans_500Medium.ttf); }
+  @font-face { font-family: DMSansSemi; src: url(../../../node_modules/@expo-google-fonts/dm-sans/600SemiBold/DMSans_600SemiBold.ttf); }
+  @font-face { font-family: Mono; src: url(../../../node_modules/@expo-google-fonts/jetbrains-mono/400Regular/JetBrainsMono_400Regular.ttf); }
+  html, body { margin: 0; width: 1024px; height: 500px; overflow: hidden; }
+  body { background: #F5F3EE; color: #1C1B19; font-family: DMSans; position: relative; }
+  .copy { position: absolute; left: 72px; top: 0; bottom: 0; width: 470px; display: flex; flex-direction: column; justify-content: center; }
+  .brand { display: flex; align-items: center; gap: 16px; }
+  .mark { width: 64px; height: 64px; border-radius: 18px; background: #1C1B19; display: grid; place-items: center; }
+  .mark div { width: 28px; height: 36px; border-radius: 6px; border: 4px solid #F5F3EE; box-sizing: border-box; transform: rotate(-8deg); }
+  .word { font-family: Bricolage; font-size: 44px; letter-spacing: -1px; }
+  h1 { font-family: Bricolage; font-size: 50px; line-height: 1.05; letter-spacing: -1.5px; margin: 36px 0 16px; }
+  h1 em { font-style: normal; color: #C2410C; }
+  p { font-size: 21px; line-height: 1.4; color: #625D55; margin: 0; }
+
+  .stage { position: absolute; right: 56px; top: 0; bottom: 0; width: 400px; }
+  .card { position: absolute; width: 300px; height: 360px; border-radius: 28px; background: #fff; border: 1px solid #E4E0D8; box-shadow: 0 18px 40px rgba(28,27,25,.12); box-sizing: border-box; }
+  .back1 { left: 70px; top: 86px; transform: rotate(8deg); background: #FBE9DF; border-color: #F6CDB6; }
+  .back2 { left: 60px; top: 74px; transform: rotate(3deg); }
+  .front { left: 40px; top: 62px; transform: rotate(-4deg); padding: 28px; display: flex; flex-direction: column; }
+  .chip { align-self: flex-start; font-family: DMSansSemi; font-size: 14px; color: #2B5FA8; background: #E3ECF8; padding: 5px 12px; border-radius: 999px; }
+  .q { font-family: Bricolage; font-size: 30px; line-height: 1.15; margin: 22px 0 14px; letter-spacing: -.5px; }
+  .code { font-family: Mono; font-size: 16px; white-space: nowrap; background: #1C1B19; color: #EDE8DE; border-radius: 12px; padding: 14px 16px; }
+  .code b { font-weight: normal; color: #F0A472; }
+  .ratings { margin-top: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .ratings span { font-family: DMSansSemi; font-size: 14px; text-align: center; padding: 10px 0; border-radius: 12px; }
+</style>
+</head>
+<body>
+  <div class="copy">
+    <div class="brand"><div class="mark"><div></div></div><span class="word">Cardly</span></div>
+    <h1>Remember what<br>you learn. <em>For good.</em></h1>
+    <p>Flashcards that schedule themselves, so a few minutes a day is enough.</p>
+  </div>
+  <div class="stage">
+    <div class="card back1"></div>
+    <div class="card back2"></div>
+    <div class="card front">
+      <span class="chip">Git</span>
+      <div class="q">Create a branch and switch to it?</div>
+      <div class="code"><b>git</b> switch -c feature</div>
+      <div class="ratings">
+        <span style="background:#FBE4E4;color:#9B1C22">Again</span>
+        <span style="background:#FAEFD9;color:#7A4D07">Hard</span>
+        <span style="background:#2F7D4F;color:#fff">Good</span>
+        <span style="background:#E3ECF8;color:#1F4A85">Easy</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

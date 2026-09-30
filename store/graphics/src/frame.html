@@ -1,0 +1,30 @@
+<!doctype html>
+<!-- One Play screenshot, 1080×1920: a caption above a raw phone screenshot.
+     Query: ?img=<raw png path>&title=<headline>&sub=<one line>. Rendered by store/render.sh. -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: Bricolage; src: url(../../../node_modules/@expo-google-fonts/bricolage-grotesque/700Bold/BricolageGrotesque_700Bold.ttf); }
+  @font-face { font-family: DMSans; src: url(../../../node_modules/@expo-google-fonts/dm-sans/500Medium/DMSans_500Medium.ttf); }
+  html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; }
+  body { background: #1C1B19; color: #F5F3EE; font-family: DMSans; text-align: center; }
+  h1 { font-family: Bricolage; font-size: 76px; line-height: 1.05; letter-spacing: -2px; margin: 110px 80px 20px; }
+  p { font-size: 36px; line-height: 1.3; color: #CFC9BE; margin: 0 100px; }
+  .phone { position: absolute; left: 50%; top: 440px; transform: translateX(-50%); width: 700px; height: 1556px;
+           border-radius: 64px; background: #2C2A26; padding: 16px; box-sizing: border-box; }
+  .phone img { width: 100%; height: 100%; border-radius: 50px; display: block; object-fit: cover; object-position: top; }
+</style>
+</head>
+<body>
+  <h1 id="t"></h1>
+  <p id="s"></p>
+  <div class="phone"><img id="i" alt=""></div>
+  <script>
+    const q = new URLSearchParams(location.search);
+    document.getElementById('t').textContent = q.get('title');
+    document.getElementById('s').textContent = q.get('sub');
+    document.getElementById('i').src = q.get('img');
+  </script>
+</body>
+</html>
