@@ -23,6 +23,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { useSyncExternalStore } from 'react';
 import { AppState, Platform } from 'react-native';
 
+import { t } from '@/i18n';
 import { useSettings } from '@/store/settings';
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
@@ -113,7 +114,7 @@ export function profile(s: Session) {
 /** "Google", "Apple" or "Email" — how this account signed in. */
 export function providerName(s: Session) {
   const p = s.user.app_metadata.provider;
-  return p === 'google' ? 'Google' : p === 'apple' ? 'Apple' : 'Email';
+  return p === 'google' ? 'Google' : p === 'apple' ? 'Apple' : t('auth.emailProvider');
 }
 
 // ─── Signing in ─────────────────────────────────────────────────────────────
@@ -172,7 +173,7 @@ export async function signInWithApple(): Promise<boolean> {
       requestedScopes: [AppleAuthentication.AppleAuthenticationScope.FULL_NAME, AppleAuthentication.AppleAuthenticationScope.EMAIL],
       nonce: hashedNonce,
     });
-    if (!credential.identityToken) throw new AuthError('Apple didn’t return a sign-in token. Please try again.');
+    if (!credential.identityToken) throw new AuthError(t('auth.appleNoToken'));
     const { error } = await client().auth.signInWithIdToken({ provider: 'apple', token: credential.identityToken, nonce: rawNonce });
     if (error) throw new AuthError(error.message);
     // Apple only shares your name the very first time, so save it on the account now.
@@ -189,12 +190,12 @@ export async function signInWithApple(): Promise<boolean> {
 export async function sendEmailCode(email: string) {
   const redirectTo = Platform.OS === 'web' ? `${window.location.origin}/auth/callback` : redirectUrl();
   const { error } = await client().auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo, shouldCreateUser: true } });
-  if (error) throw new AuthError(error.status === 429 ? 'Too many emails — wait a minute, then try again.' : error.message);
+  if (error) throw new AuthError(error.status === 429 ? t('auth.tooManyEmails') : error.message);
 }
 
 export async function verifyEmailCode(email: string, code: string) {
   const { error } = await client().auth.verifyOtp({ email, token: code, type: 'email' });
-  if (error) throw new AuthError(/expired|invalid/i.test(error.message) ? 'That code is wrong or has expired. Check the latest email, or send a new code.' : error.message);
+  if (error) throw new AuthError(/expired|invalid/i.test(error.message) ? t('auth.badCode') : error.message);
 }
 
 export async function signOut() {

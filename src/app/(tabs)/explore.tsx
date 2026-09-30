@@ -10,6 +10,7 @@ import { STARTER_DECKS, type StarterDeck } from '@/data/starterDecks';
 import { addStarterDeck } from '@/db/imports';
 import { getDecks } from '@/db/queries';
 import { cardOrds } from '@/lib/notes';
+import { t } from '@/i18n';
 import { useSettings } from '@/store/settings';
 import { colors, radius, spacing, touchTarget, type } from '@/theme';
 
@@ -56,32 +57,32 @@ export default function Explore() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={type.title}>Explore</Text>
+        <Text style={type.title}>{t('tabs.explore')}</Text>
 
         <Pressable
           onPress={() => router.push('/import')}
           accessibilityRole="button"
-          accessibilityLabel="Import cards from Anki or a spreadsheet"
+          accessibilityLabel={t('explore.importA11y')}
           style={({ pressed }) => [styles.import, pressed && { opacity: 0.9 }]}
         >
           <View style={styles.importIcon}>
             <Ionicons name="download-outline" size={22} color={colors.surface} />
           </View>
           <View style={{ flex: 1, gap: 2 }}>
-            <Text style={[type.bodySemi, { color: colors.surface }]}>Import cards</Text>
-            <Text style={[type.caption, { color: '#BDB7AD' }]}>From Anki (.apkg) or a spreadsheet (CSV)</Text>
+            <Text style={[type.bodySemi, { color: colors.surface }]}>{t('common.importCards')}</Text>
+            <Text style={[type.caption, { color: '#BDB7AD' }]}>{t('explore.importSub')}</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color={colors.surface} />
         </Pressable>
 
         {forYou.length > 0 && (
           <View style={styles.section}>
-            <Text style={type.section}>For you</Text>
+            <Text style={type.section}>{t('explore.forYou')}</Text>
             {forYou.map(row)}
           </View>
         )}
         <View style={styles.section}>
-          <Text style={type.section}>{forYou.length ? 'More starter decks' : 'Starter decks'}</Text>
+          <Text style={type.section}>{forYou.length ? t('explore.moreStarter') : t('explore.starter')}</Text>
           {more.map(row)}
         </View>
       </ScrollView>
@@ -98,22 +99,22 @@ function StarterRow({ deck, ownedId, busy, onAdd }: { deck: StarterDeck; ownedId
       <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
         <Text style={type.bodySemi}>{deck.name}</Text>
         <Text style={type.caption}>{deck.description}</Text>
-        <Text style={type.small}>{`${cards} cards`}</Text>
+        <Text style={type.small}>{t('common.cards', { count: cards })}</Text>
       </View>
       {ownedId != null ? (
-        <Pressable onPress={open} accessibilityRole="button" accessibilityLabel={`${deck.name} added. Open deck`} style={[styles.action, styles.added]}>
+        <Pressable onPress={open} accessibilityRole="button" accessibilityLabel={t('explore.addedA11y', { name: deck.name })} style={[styles.action, styles.added]}>
           <Ionicons name="checkmark" size={18} color={colors.ink} />
-          <Text style={type.bodySemi}>Added</Text>
+          <Text style={type.bodySemi}>{t('explore.added')}</Text>
         </Pressable>
       ) : (
         <Pressable
           onPress={onAdd}
           disabled={busy}
           accessibilityRole="button"
-          accessibilityLabel={`Add ${deck.name}, ${cards} cards`}
+          accessibilityLabel={t('explore.addA11y', { name: deck.name, cards: t('common.cards', { count: cards }) })}
           style={({ pressed }) => [styles.action, pressed && { backgroundColor: colors.accentPressed }]}
         >
-          {busy ? <ActivityIndicator color={colors.onAccent} /> : <Text style={[type.bodySemi, { color: colors.onAccent }]}>Add</Text>}
+          {busy ? <ActivityIndicator color={colors.onAccent} /> : <Text style={[type.bodySemi, { color: colors.onAccent }]}>{t('explore.add')}</Text>}
         </Pressable>
       )}
     </View>

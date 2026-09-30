@@ -6,6 +6,7 @@ import { deserializeDatabaseAsync, type SQLiteDatabase } from 'expo-sqlite';
 
 import type { StarterDeck } from '@/data/starterDecks';
 import { createDeck, createNote, setCardSchedule } from '@/db/queries';
+import { t } from '@/i18n';
 import {
   extractCollection,
   ImportError,
@@ -30,7 +31,7 @@ export async function readApkg(apkg: Uint8Array): Promise<AnkiCollection> {
 export async function readAnkiCollection(anki: SQLiteDatabase): Promise<AnkiCollection> {
   const hasTable = async (name: string) =>
     !!(await anki.getFirstAsync(`SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?`, name));
-  if (!(await hasTable('notes')) || !(await hasTable('col'))) throw new ImportError('This file isn’t an Anki collection.');
+  if (!(await hasTable('notes')) || !(await hasTable('col'))) throw new ImportError(t('import.notCollection'));
 
   const col = await anki.getFirstAsync<{ crt: number; models: string; decks: string }>('SELECT crt, models, decks FROM col');
   const models = new Map<number, AnkiModel>();

@@ -13,11 +13,12 @@ import { cardsRemovedBy, createNote, deleteNote, getDecks, updateNote, type Deck
 import { confirm } from '@/lib/confirm';
 import { LANGUAGES } from '@/lib/highlight';
 import { insertCodeBlock, wrapSelection, type Selection } from '@/lib/markup';
+import { t } from '@/i18n';
 import { goBack } from '@/lib/nav';
 import { emptyNote, NOTE_TYPE_LABEL, nextClozeNumber, parseTags, validateNote, type NoteData, type NoteType } from '@/lib/notes';
 import { colors, fonts, radius, ratingColors, spacing, touchTarget, type } from '@/theme';
 
-const TYPES: [NoteType, string][] = (['basic', 'cloze', 'code', 'vocab'] as const).map((t) => [t, NOTE_TYPE_LABEL[t]]);
+const TYPES: [NoteType, string][] = (['basic', 'cloze', 'code', 'vocab'] as const).map((type) => [type, NOTE_TYPE_LABEL[type]]);
 
 /** Remember the last type you created during this app session. */
 let lastNewType: NoteType = 'basic';
@@ -53,7 +54,7 @@ export function NoteForm({
   const [noteType, setNoteType] = useState<NoteType>(initial?.type ?? lastNewType);
   // One draft per type, so switching Basic → Code → Basic brings your text back.
   const [drafts, setDrafts] = useState(() => {
-    const d = Object.fromEntries(TYPES.map(([t]) => [t, emptyNote(t)])) as Record<NoteType, NoteData>;
+    const d = Object.fromEntries(TYPES.map(([type]) => [type, emptyNote(type)])) as Record<NoteType, NoteData>;
     if (initial) d[initial.type] = initial;
     return d;
   });
@@ -97,26 +98,26 @@ export function NoteForm({
     setField(key, result.text);
   };
   const tools = (key: string, extra: Tool[] = []): Tool[] => [
-    { key: 'bold', label: 'B', a11y: 'Bold', onPress: () => apply(key, (v, s) => wrapSelection(v, s, '**', '**', 'bold')) },
-    { key: 'code', label: '</>', a11y: 'Code block', mono: true, onPress: () => apply(key, (v, s) => insertCodeBlock(v, s)) },
+    { key: 'bold', label: 'B', a11y: t('noteForm.bold'), onPress: () => apply(key, (v, s) => wrapSelection(v, s, '**', '**', 'bold')) },
+    { key: 'code', label: '</>', a11y: t('noteForm.codeBlock'), mono: true, onPress: () => apply(key, (v, s) => insertCodeBlock(v, s)) },
     ...extra,
   ];
   const clozeTool = (key: string): Tool => ({
     key: 'cloze',
-    label: '[…] Cloze',
-    a11y: 'Hide selection as a cloze',
+    label: t('noteForm.clozeButton'),
+    a11y: t('noteForm.clozeA11y'),
     onPress: () => apply(key, (v, s) => wrapSelection(v, s, `{{c${nextClozeNumber(v)}::`, '}}', 'answer')),
   });
 
   async function save() {
-    const problem = validateNote(note) ?? (deck ? null : 'Pick a deck');
+    const problem = validateNote(note) ?? (deck ? null : t('noteForm.pickDeck'));
     if (problem || !deck) return setError(problem);
     const data = cleaned(note);
     const tagList = parseTags(tags);
     if (noteId !== undefined) {
       const removed = await cardsRemovedBy(db, noteId, data);
-      const what = `${removed} card${removed === 1 ? '' : 's'}`;
-      if (removed && !(await confirm(`Remove ${what}?`, `This edit removes ${what} and ${removed === 1 ? 'its' : 'their'} review history.`, 'Remove')))
+      const what = t('common.cards', { count: removed });
+      if (removed && !(await confirm(t('noteForm.removeTitle', { what }), t('noteForm.removeBody', { what, count: removed }), t('noteForm.remove'))))
         return;
       await updateNote(db, noteId, deck.id, data, tagList);
     } else {
@@ -128,7 +129,7 @@ export function NoteForm({
 
   async function remove() {
     if (noteId === undefined) return;
-    if (!(await confirm('Delete this note?', 'Its cards and their review history are deleted too. This can’t be undone.'))) return;
+    if (!(await confirm(t('noteForm.deleteTitle'), t('noteForm.deleteBody')))) return;
     await deleteNote(db, noteId);
     goBack();
   }
@@ -137,9 +138,9 @@ export function NoteForm({
     return (
       <SafeAreaView style={styles.safe}>
         <View style={[styles.content, { gap: spacing.lg }]}>
-          <ModalHeader title="New card" onCancel={goBack} />
-          <Text style={type.body}>You need a deck before you can add cards.</Text>
-          <Button title="Create a deck" onPress={() => router.replace('/deck/new')} />
+          <ModalHeader title={t('noteForm.newCard')} onCancel={goBack} />
+          <Text style={type.body}>{t('noteForm.needDeck')}</Text>
+          <Button title={t('noteForm.createDeck')} onPress={() => router.replace('/deck/new')} />
         </View>
       </SafeAreaView>
     );
@@ -149,7 +150,7 @@ export function NoteForm({
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.header}>
-          <ModalHeader title={editing ? 'Edit card' : 'New card'} onCancel={goBack} onSave={save} />
+          <ModalHeader title={editing ? t('study.edit') : t('noteForm.newCard')} onCancel={goBack} onSave={save} />
         </View>
 
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
@@ -161,9 +162,9 @@ export function NoteForm({
           )}
 
           <View style={{ gap: spacing.sm }}>
-            <SectionLabel>Card type</SectionLabel>
+            <SectionLabel>{t('noteForm.cardType')}</SectionLabel>
             {editing ? (
-              <Text style={type.caption}>{NOTE_TYPE_LABEL[noteType]} · the type can’t be changed after creating</Text>
+              <Text style={type.caption}>{t('noteForm.typeFixed', { type: NOTE_TYPE_LABEL[noteType] })}</Text>
             ) : (
               <Chips
                 options={TYPES}
@@ -180,11 +181,11 @@ export function NoteForm({
             <Pressable
               onPress={() => setPickerOpen((o) => !o)}
               accessibilityRole="button"
-              accessibilityLabel={`Deck: ${deck?.name ?? 'none'}. Change deck`}
+              accessibilityLabel={t('noteForm.deckA11y', { deck: deck?.name ?? t('common.none') })}
               accessibilityState={{ expanded: pickerOpen }}
               style={styles.deckButton}
             >
-              <Text style={styles.deckLabel}>Deck</Text>
+              <Text style={styles.deckLabel}>{t('noteForm.deck')}</Text>
               <Text style={styles.deckName} numberOfLines={1}>
                 {deck?.name ?? ' '}
               </Text>
@@ -216,39 +217,39 @@ export function NoteForm({
 
           {note.type === 'basic' && (
             <>
-              <Field label="Front" placeholder="Question or prompt" multiline minHeight={76} tools={tools('front')} {...bind('front')} />
-              <Field label="Back" placeholder="Answer" multiline minHeight={120} tools={tools('back')} {...bind('back')} />
-              <Checkbox label="Also create a reversed card" checked={!!f.reverse} onChange={(v) => setField('reverse', v)} />
+              <Field label={t('common.front')} placeholder={t('noteForm.frontPlaceholder')} multiline minHeight={76} tools={tools('front')} {...bind('front')} />
+              <Field label={t('common.backSide')} placeholder={t('noteForm.answer')} multiline minHeight={120} tools={tools('back')} {...bind('back')} />
+              <Checkbox label={t('noteForm.reverse')} checked={!!f.reverse} onChange={(v) => setField('reverse', v)} />
             </>
           )}
 
           {note.type === 'cloze' && (
             <>
               <Field
-                label="Text"
-                placeholder="The mitochondria is the powerhouse of the cell"
-                hint="Select a word or phrase, then tap “Cloze” to hide it. Each cloze number becomes its own card."
+                label={t('noteForm.text')}
+                placeholder={t('noteForm.textPlaceholder')}
+                hint={t('noteForm.textHint')}
                 multiline
                 minHeight={120}
                 tools={tools('text', [clozeTool('text')])}
                 {...bind('text')}
               />
-              <Field label="Extra (optional)" placeholder="Shown after the answer" multiline minHeight={60} tools={tools('extra')} {...bind('extra')} />
+              <Field label={t('noteForm.extra')} placeholder={t('noteForm.extraPlaceholder')} multiline minHeight={60} tools={tools('extra')} {...bind('extra')} />
             </>
           )}
 
           {note.type === 'code' && (
             <>
-              <Field label="Prompt" placeholder="What does this code log to the console?" multiline {...bind('prompt')} />
+              <Field label={t('noteForm.prompt')} placeholder={t('noteForm.promptPlaceholder')} multiline {...bind('prompt')} />
               <View style={{ gap: spacing.sm }}>
-                <SectionLabel>Language</SectionLabel>
+                <SectionLabel>{t('noteForm.language')}</SectionLabel>
                 <Chips options={LANGUAGES} value={String(f.language)} onChange={(l) => setField('language', l)} scroll />
               </View>
-              <Field label="Code" placeholder={'for (let i = 0; i < 3; i++) {\n  …\n}'} multiline mono minHeight={130} {...bind('code')} />
-              <Field label="Answer" placeholder="3, 3, 3" mono {...bind('answer')} />
+              <Field label={t('cardTypes.code')} placeholder={'for (let i = 0; i < 3; i++) {\n  …\n}'} multiline mono minHeight={130} {...bind('code')} />
+              <Field label={t('noteForm.answer')} placeholder="3, 3, 3" mono {...bind('answer')} />
               <Field
-                label="Explanation (optional)"
-                placeholder="Why that's the answer"
+                label={t('noteForm.explanation')}
+                placeholder={t('noteForm.explanationPlaceholder')}
                 multiline
                 minHeight={90}
                 tools={tools('explanation')}
@@ -259,33 +260,33 @@ export function NoteForm({
 
           {note.type === 'vocab' && (
             <>
-              <Field label="Word" placeholder="勉強する" {...bind('word')} />
-              <Field label="Reading (optional)" placeholder="べんきょうする" {...bind('reading')} />
-              <Field label="Transliteration (optional)" placeholder="benkyō suru" autoCapitalize="none" {...bind('transliteration')} />
-              <Field label="Part of speech (optional)" placeholder="Verb" {...bind('pos')} />
+              <Field label={t('noteForm.word')} placeholder="勉強する" {...bind('word')} />
+              <Field label={t('noteForm.reading')} placeholder="べんきょうする" {...bind('reading')} />
+              <Field label={t('noteForm.transliteration')} placeholder="benkyō suru" autoCapitalize="none" {...bind('transliteration')} />
+              <Field label={t('noteForm.pos')} placeholder={t('noteForm.posPlaceholder')} {...bind('pos')} />
               <Field
-                label="Meaning"
-                placeholder="to study, to learn"
-                hint="Separate alternatives with commas — any of them counts as correct when you type the answer."
+                label={t('noteForm.meaning')}
+                placeholder={t('noteForm.meaningPlaceholder')}
+                hint={t('noteForm.meaningHint')}
                 autoCapitalize="none"
                 {...bind('meaning')}
               />
-              <Field label="Example (optional)" placeholder="毎日日本語を勉強します。" multiline {...bind('example')} />
-              <Checkbox label="Also practise producing the word" checked={!!f.reverse} onChange={(v) => setField('reverse', v)} />
+              <Field label={t('noteForm.example')} placeholder="毎日日本語を勉強します。" multiline {...bind('example')} />
+              <Checkbox label={t('noteForm.produce')} checked={!!f.reverse} onChange={(v) => setField('reverse', v)} />
             </>
           )}
 
           <Field
-            label="Tags (optional)"
+            label={t('noteForm.tags')}
             placeholder="closures scope"
-            hint="Separate with spaces or commas. The first two show on the card."
+            hint={t('noteForm.tagsHint')}
             autoCapitalize="none"
             autoCorrect={false}
             value={tags}
             onChangeText={setTags}
           />
 
-          {editing && <Button title="Delete card" variant="danger" onPress={remove} style={{ marginTop: spacing.lg }} />}
+          {editing && <Button title={t('noteForm.deleteCard')} variant="danger" onPress={remove} style={{ marginTop: spacing.lg }} />}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

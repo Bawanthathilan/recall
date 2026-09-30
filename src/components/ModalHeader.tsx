@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { t } from '@/i18n';
 import { colors, fonts, touchTarget } from '@/theme';
 
 /** "Cancel · Title · Save" bar from the mockup's Create screen. */
@@ -7,7 +8,7 @@ export function ModalHeader({
   title,
   onCancel,
   onSave,
-  saveLabel = 'Save',
+  saveLabel = t('common.save'),
   canSave = true,
 }: {
   title: string;
@@ -19,7 +20,7 @@ export function ModalHeader({
   return (
     <View style={styles.bar}>
       <Pressable onPress={onCancel} accessibilityRole="button" hitSlop={8} style={styles.side}>
-        <Text style={styles.cancel}>Cancel</Text>
+        <Text style={styles.cancel}>{t('common.cancel')}</Text>
       </Pressable>
       <Text style={styles.title} accessibilityRole="header">
         {title}

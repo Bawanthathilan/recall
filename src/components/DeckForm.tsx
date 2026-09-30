@@ -15,6 +15,8 @@ import { confirm } from '@/lib/confirm';
 import { goBack } from '@/lib/nav';
 import { dayKey } from '@/lib/stats';
 import { useSettings } from '@/store/settings';
+import { t } from '@/i18n';
+import { formatDate } from '@/i18n/dates';
 import { colors, fonts, radius, spacing, tones, touchTarget, type, type Tone } from '@/theme';
 
 const ICONS = [
@@ -45,12 +47,12 @@ export function DeckForm({ deck, cardCount = 0 }: { deck?: Deck; cardCount?: num
 
   // "default" = no override: the deck follows the global setting in Settings.
   const paceOptions: [string, string][] = [
-    ['default', `Default (${globalPerDay})`],
+    ['default', t('deckForm.default', { count: globalPerDay })],
     ...[10, 20, 30, 50].map((n): [string, string] => [String(n), String(n)]),
   ];
   const examLabel = examDate
-    ? new Date(`${examDate}T00:00`).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })
-    : 'No exam date';
+    ? formatDate(new Date(`${examDate}T00:00`), { weekday: 'short', day: true, month: 'long', year: true })
+    : t('deckForm.noExam');
 
   async function save() {
     if (!canSave) return;
@@ -68,8 +70,8 @@ export function DeckForm({ deck, cardCount = 0 }: { deck?: Deck; cardCount?: num
 
   async function remove() {
     if (!deck) return;
-    const cards = `${cardCount} card${cardCount === 1 ? '' : 's'}`;
-    if (!(await confirm(`Delete “${deck.name}”?`, `This deletes the deck, its ${cards} and their review history.`))) return;
+    if (!(await confirm(t('deckForm.deleteTitle', { name: deck.name }), t('deckForm.deleteBody', { cards: t('common.cards', { count: cardCount }) }))))
+      return;
     await deleteDeck(db, deck.id);
     router.dismissTo('/decks');
   }
@@ -77,7 +79,7 @@ export function DeckForm({ deck, cardCount = 0 }: { deck?: Deck; cardCount?: num
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <View style={styles.header}>
-        <ModalHeader title={deck ? 'Edit deck' : 'New deck'} onCancel={goBack} onSave={save} canSave={canSave} />
+        <ModalHeader title={deck ? t('deckForm.editDeck') : t('common.newDeck')} onCancel={goBack} onSave={save} canSave={canSave} />
       </View>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.preview}>
@@ -85,12 +87,12 @@ export function DeckForm({ deck, cardCount = 0 }: { deck?: Deck; cardCount?: num
         </View>
 
         <Text style={styles.fieldLabel} nativeID="deck-name">
-          Name
+          {t('deckForm.name')}
         </Text>
         <TextInput
           value={name}
           onChangeText={setName}
-          placeholder="e.g. Spanish A1, Organic Chemistry II"
+          placeholder={t('deckForm.namePlaceholder')}
           placeholderTextColor={colors.muted}
           accessibilityLabelledBy="deck-name"
           style={styles.input}
@@ -99,7 +101,7 @@ export function DeckForm({ deck, cardCount = 0 }: { deck?: Deck; cardCount?: num
           onSubmitEditing={save}
         />
 
-        <Text style={styles.fieldLabel}>Icon</Text>
+        <Text style={styles.fieldLabel}>{t('deckForm.icon')}</Text>
         <View style={styles.grid}>
           {ICONS.map((i) => {
             const on = i === icon;
@@ -118,7 +120,7 @@ export function DeckForm({ deck, cardCount = 0 }: { deck?: Deck; cardCount?: num
           })}
         </View>
 
-        <Text style={styles.fieldLabel}>Colour</Text>
+        <Text style={styles.fieldLabel}>{t('deckForm.colour')}</Text>
         <View style={styles.tones}>
           {(Object.keys(tones) as Tone[]).map((t) => {
             const on = t === tone;
@@ -137,12 +139,12 @@ export function DeckForm({ deck, cardCount = 0 }: { deck?: Deck; cardCount?: num
           })}
         </View>
 
-        <Text style={styles.fieldLabel}>Exam date (optional)</Text>
+        <Text style={styles.fieldLabel}>{t('deckForm.examDate')}</Text>
         <View style={styles.examRow}>
           <Pressable
             onPress={() => setCalendarOpen((o) => !o)}
             accessibilityRole="button"
-            accessibilityLabel={`Exam date: ${examLabel}. ${calendarOpen ? 'Close' : 'Open'} calendar`}
+            accessibilityLabel={t(calendarOpen ? 'deckForm.examA11yClose' : 'deckForm.examA11yOpen', { date: examLabel })}
             accessibilityState={{ expanded: calendarOpen }}
             style={styles.examButton}
           >
@@ -156,10 +158,10 @@ export function DeckForm({ deck, cardCount = 0 }: { deck?: Deck; cardCount?: num
                 setCalendarOpen(false);
               }}
               accessibilityRole="button"
-              accessibilityLabel="Clear exam date"
+              accessibilityLabel={t('deckForm.clearExam')}
               style={styles.clear}
             >
-              <Text style={styles.clearText}>Clear</Text>
+              <Text style={styles.clearText}>{t('deckForm.clear')}</Text>
             </Pressable>
           )}
         </View>
@@ -176,14 +178,14 @@ export function DeckForm({ deck, cardCount = 0 }: { deck?: Deck; cardCount?: num
           </View>
         )}
 
-        <Text style={styles.fieldLabel}>New cards per day</Text>
+        <Text style={styles.fieldLabel}>{t('deckForm.newPerDay')}</Text>
         <Chips
           options={paceOptions}
           value={newPerDay == null ? 'default' : String(newPerDay)}
           onChange={(v) => setNewPerDay(v === 'default' ? null : Number(v))}
         />
 
-        {deck && <Button title="Delete deck" variant="danger" onPress={remove} style={{ marginTop: spacing.xxl + spacing.lg }} />}
+        {deck && <Button title={t('deckForm.deleteDeck')} variant="danger" onPress={remove} style={{ marginTop: spacing.xxl + spacing.lg }} />}
       </ScrollView>
     </SafeAreaView>
   );

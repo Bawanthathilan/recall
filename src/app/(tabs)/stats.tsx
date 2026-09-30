@@ -9,9 +9,10 @@ import { DeckTile } from '@/components/DeckRow';
 import { ExamCard } from '@/components/ExamCard';
 import { ChartCard, ForecastBars, Heatmap, StatTile } from '@/components/ProgressCharts';
 import { getDeckSummaries, getProgress, RETENTION_WINDOW_DAYS, setDeckNewPerDay, type DeckSummary, type Progress } from '@/db/queries';
+import { locale, t } from '@/i18n';
 import { heatmapGrid } from '@/lib/stats';
 import { useSettings } from '@/store/settings';
-import { colors, fonts, radius, spacing, touchTarget, type } from '@/theme';
+import { colors, fonts, lineHeight, radius, spacing, touchTarget, type } from '@/theme';
 
 export default function Stats() {
   const db = useSQLiteContext();
@@ -39,7 +40,7 @@ export default function Stats() {
 
   const grid = useMemo(() => (data ? heatmapGrid(data.progress.dailyReviews, data.loadedAt) : null), [data]);
   const p = data?.progress;
-  const deckName = decks.find((d) => d.id === deckId)?.name ?? 'All decks';
+  const deckName = decks.find((d) => d.id === deckId)?.name ?? t('common.allDecks');
   const retention = p?.retention == null ? '—' : `${Math.round(p.retention * 100)}%`;
   // Upcoming exams, soonest first (just the chosen deck when filtered).
   const exams = decks
@@ -51,12 +52,12 @@ export default function Stats() {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <Text style={type.title} accessibilityRole="header">
-            Progress
+            {t('stats.title')}
           </Text>
           <Pressable
             onPress={() => setFilterOpen((o) => !o)}
             accessibilityRole="button"
-            accessibilityLabel={`Showing ${deckName}. Change deck`}
+            accessibilityLabel={t('stats.showingA11y', { deck: deckName })}
             accessibilityState={{ expanded: filterOpen }}
             style={styles.filter}
           >
@@ -90,7 +91,7 @@ export default function Stats() {
                     </View>
                   )}
                   <Text style={[type.bodySemi, { flex: 1 }]} numberOfLines={1}>
-                    {d?.name ?? 'All decks'}
+                    {d?.name ?? t('common.allDecks')}
                   </Text>
                   {id === deckId && <Ionicons name="checkmark" size={18} color={colors.accent} />}
                 </Pressable>
@@ -101,23 +102,27 @@ export default function Stats() {
 
         <View style={styles.tiles}>
           <StatTile
-            label="Retention"
+            label={t('stats.retention')}
             value={retention}
             a11y={
               p?.retention == null
-                ? 'Retention: not enough reviews yet'
-                : `Retention ${retention}, from ${p.retentionSample} reviews in the last ${RETENTION_WINDOW_DAYS} days`
+                ? t('stats.retentionNone')
+                : t('stats.retentionA11y', { value: retention, count: p.retentionSample, days: RETENTION_WINDOW_DAYS })
             }
           />
-          <StatTile label="Reviews" value={p ? p.totalReviews.toLocaleString() : '—'} />
-          <StatTile label="Best streak" value={p ? `${p.bestStreak}d` : '—'} a11y={p ? `Best streak: ${p.bestStreak} days` : undefined} />
+          <StatTile label={t('stats.reviews')} value={p ? p.totalReviews.toLocaleString(locale) : '—'} />
+          <StatTile
+            label={t('stats.bestStreak')}
+            value={p ? t('stats.bestStreakValue', { count: p.bestStreak }) : '—'}
+            a11y={p ? t('stats.bestStreakA11y', { count: p.bestStreak }) : undefined}
+          />
         </View>
 
-        <ChartCard title="Study activity" subtitle="Last 16 weeks">
+        <ChartCard title={t('stats.activity')} subtitle={t('stats.last16Weeks')}>
           {grid && <Heatmap grid={grid} />}
         </ChartCard>
 
-        <ChartCard title="Upcoming reviews" subtitle="Next 7 days">
+        <ChartCard title={t('stats.upcoming')} subtitle={t('stats.next7Days')}>
           {p && <ForecastBars days={p.forecast} />}
         </ChartCard>
 
@@ -133,10 +138,7 @@ export default function Stats() {
           />
         ))}
 
-        <Text style={styles.footnote}>
-          Retention is the share of cards you remembered (Hard, Good or Easy) when they came up for review in the last{' '}
-          {RETENTION_WINDOW_DAYS} days. FSRS schedules reviews to keep it around 90%. Upcoming reviews don’t include new cards.
-        </Text>
+        <Text style={styles.footnote}>{t('stats.footnote', { days: RETENTION_WINDOW_DAYS })}</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -171,5 +173,5 @@ const styles = StyleSheet.create({
   },
   allIcon: { width: 28, height: 28, borderRadius: radius.sm, backgroundColor: colors.track, alignItems: 'center', justifyContent: 'center' },
   tiles: { flexDirection: 'row', gap: spacing.sm },
-  footnote: { fontFamily: fonts.body, fontSize: 12, lineHeight: 17, color: colors.muted },
+  footnote: { fontFamily: fonts.body, fontSize: 12, lineHeight: lineHeight(12, 17), color: colors.muted },
 });

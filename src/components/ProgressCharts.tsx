@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View, type GestureResponderEvent, type LayoutChangeEvent } from 'react-native';
 
 import type { ForecastDay, HeatCell } from '@/lib/stats';
+import { t } from '@/i18n';
+import { formatDate } from '@/i18n/dates';
 import { chartColors, colors, fonts, radius, spacing, type } from '@/theme';
 
 // ─── Stat tile ──────────────────────────────────────────────────────────────
@@ -33,8 +35,7 @@ export function ChartCard({ title, subtitle, children }: { title: string; subtit
 // ─── Heatmap ────────────────────────────────────────────────────────────────
 
 const GAP = 4;
-const plural = (n: number, word: string) => `${n.toLocaleString()} ${word}${n === 1 ? '' : 's'}`;
-const longDate = (d: Date) => d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+const longDate = (d: Date) => formatDate(d, { weekday: 'short', day: true, month: 'short' });
 
 /**
  * 16 week-columns × 7 day-rows. Cells are ~16 px — far below a 44 px touch
@@ -65,19 +66,24 @@ export function Heatmap({ grid }: { grid: HeatCell[][] }) {
   }
 
   const summary = total
-    ? `${plural(total, 'review')} on ${plural(studied, 'day')}${busiest ? `. Busiest: ${longDate(busiest.date)}, ${plural(busiest.count, 'review')}` : ''}.`
-    : 'No reviews yet in the last 16 weeks.';
+    ? t('charts.summary', { reviews: t('common.reviews', { count: total }), days: t('common.days', { count: studied }) }) +
+      (busiest ? ' ' + t('charts.busiest', { date: longDate(busiest.date), reviews: t('common.reviews', { count: busiest.count }) }) : '')
+    : t('charts.noReviews');
 
   return (
     <>
       <Text style={styles.caption} accessibilityLiveRegion="polite">
-        {picked ? `${longDate(picked.date)} · ${plural(picked.count, 'review')}` : total ? 'Tap a day for details' : 'Your study days will fill in here'}
+        {picked
+          ? `${longDate(picked.date)} · ${t('common.reviews', { count: picked.count })}`
+          : total
+            ? t('charts.tapDay')
+            : t('charts.empty')}
       </Text>
       <Pressable
         onPress={onPress}
         onLayout={(e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width)}
         accessibilityRole="image"
-        accessibilityLabel={`Study activity, last 16 weeks. ${summary}`}
+        accessibilityLabel={`${t('stats.activity')}, ${t('stats.last16Weeks')}. ${summary}`}
         style={[styles.grid, { height: cell ? cell * 7 + GAP * 6 : 0 }]}
       >
         {cell > 0 &&
@@ -97,11 +103,11 @@ export function Heatmap({ grid }: { grid: HeatCell[][] }) {
           ))}
       </Pressable>
       <View style={styles.legend} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-        <Text style={styles.legendText}>Less</Text>
+        <Text style={styles.legendText}>{t('charts.less')}</Text>
         {chartColors.heat.map((c) => (
           <View key={c} style={[styles.legendSwatch, { backgroundColor: c }]} />
         ))}
-        <Text style={styles.legendText}>More</Text>
+        <Text style={styles.legendText}>{t('charts.more')}</Text>
       </View>
     </>
   );
@@ -114,10 +120,10 @@ const BAR_MAX = 70;
 /** Next 7 days. Values sit on each bar's cap (no axis needed); today in ink, the rest grey. */
 export function ForecastBars({ days }: { days: ForecastDay[] }) {
   const max = Math.max(1, ...days.map((d) => d.count));
-  const label = (d: ForecastDay) => (d.isToday ? 'Today' : d.date.toLocaleDateString(undefined, { weekday: 'short' }));
+  const label = (d: ForecastDay) => (d.isToday ? t('tabs.today') : formatDate(d.date, { weekday: 'short' }));
   const summary = days.map((d) => `${label(d)} ${d.count}`).join(', ');
   return (
-    <View style={styles.bars} accessible accessibilityRole="image" accessibilityLabel={`Cards due in the next 7 days: ${summary}.`}>
+    <View style={styles.bars} accessible accessibilityRole="image" accessibilityLabel={t('charts.forecastA11y', { summary })}>
       {days.map((d) => (
         <View key={d.key} style={styles.barSlot}>
           <Text style={styles.barValue}>{d.count}</Text>

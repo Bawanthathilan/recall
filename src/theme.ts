@@ -3,7 +3,11 @@
  *
  * Every colour, font, radius and spacing value used by the UI lives here, so
  * screens never hard-code hex values. Change the look of the app from this file.
+ *
+ * In Sinhala the app uses Noto Sans Sinhala (it has Latin letters too), taller lines
+ * for the vowel signs above and below letters, and no negative letter spacing.
  */
+import { isSinhala } from '@/i18n/language';
 
 export const colors = {
   ground: '#F5F3EE', // app background
@@ -57,7 +61,7 @@ export const codeColors = {
  * `fontWeight` alone won't switch weights. Use these names as `fontFamily`.
  * They must match the keys passed to `useFonts` in src/app/_layout.tsx.
  */
-export const fonts = {
+const latinFonts = {
   heading: 'BricolageGrotesque_700Bold',
   headingMedium: 'BricolageGrotesque_600SemiBold',
   body: 'DMSans_400Regular',
@@ -66,7 +70,21 @@ export const fonts = {
   bodyBold: 'DMSans_700Bold',
   mono: 'JetBrainsMono_400Regular',
   monoMedium: 'JetBrainsMono_500Medium',
-} as const;
+};
+
+/** Code stays in JetBrains Mono: code is written in English whatever the app's language. */
+const sinhalaFonts: typeof latinFonts = {
+  heading: 'NotoSansSinhala_700Bold',
+  headingMedium: 'NotoSansSinhala_600SemiBold',
+  body: 'NotoSansSinhala_400Regular',
+  bodyMedium: 'NotoSansSinhala_500Medium',
+  bodySemi: 'NotoSansSinhala_600SemiBold',
+  bodyBold: 'NotoSansSinhala_700Bold',
+  mono: latinFonts.mono,
+  monoMedium: latinFonts.monoMedium,
+};
+
+export const fonts = isSinhala ? sinhalaFonts : latinFonts;
 
 export const radius = {
   xs: 8, // small chips
@@ -88,10 +106,16 @@ export const spacing = {
   xxl: 28,
 } as const;
 
+/**
+ * Line height for a style that sets its own: unchanged in English, and at least
+ * 1.5× the font size in Sinhala so vowel signs above and below letters aren't clipped.
+ */
+export const lineHeight = (fontSize: number, latin: number) => (isSinhala ? Math.max(latin, Math.round(fontSize * 1.5)) : latin);
+
 /** Apple HIG / Material minimum touch target. */
 export const touchTarget = 44;
 
-export const type = {
+const latinType = {
   display: { fontFamily: fonts.heading, fontSize: 36, lineHeight: 38, letterSpacing: -1, color: colors.ink },
   title: { fontFamily: fonts.heading, fontSize: 30, lineHeight: 34, letterSpacing: -0.8, color: colors.ink },
   cardTitle: { fontFamily: fonts.heading, fontSize: 26, lineHeight: 30, letterSpacing: -0.5, color: colors.ink },
@@ -102,7 +126,20 @@ export const type = {
   small: { fontFamily: fonts.body, fontSize: 12, lineHeight: 16, color: colors.muted },
   label: { fontFamily: fonts.bodySemi, fontSize: 12, lineHeight: 16, letterSpacing: 0.6, color: colors.muted },
   mono: { fontFamily: fonts.mono, fontSize: 14, lineHeight: 22, color: colors.ink },
-} as const;
+};
+
+type TextStyle = { fontFamily: string; fontSize: number; lineHeight: number; letterSpacing?: number; color: string };
+
+/** Sinhala: headings a size smaller (words run longer), lines at least 1.5× the size, no tightened spacing. */
+function sinhalaStyle(t: TextStyle, key: string): TextStyle {
+  const heading = key === 'display' || key === 'title' || key === 'cardTitle';
+  const fontSize = heading ? Math.round(t.fontSize * 0.85) : t.fontSize;
+  return { ...t, fontSize, lineHeight: Math.max(t.lineHeight, Math.round(fontSize * 1.5)), letterSpacing: 0 };
+}
+
+export const type: typeof latinType = isSinhala
+  ? (Object.fromEntries(Object.entries(latinType).map(([k, t]) => [k, sinhalaStyle(t, k)])) as typeof latinType)
+  : latinType;
 
 export const theme = { colors, ratingColors, tones, chartColors, codeColors, fonts, radius, spacing, touchTarget, type };
 export default theme;

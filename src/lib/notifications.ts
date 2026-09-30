@@ -10,6 +10,7 @@ import { Platform } from 'react-native';
 // Web uses ./notifications.web.ts instead of this file (see there).
 
 import { getDeckSummaries, getProgress, getSecondsPerReview, getStreak } from '@/db/queries';
+import { t } from '@/i18n';
 import { dueByDay, planReminders } from '@/lib/reminders';
 import { dayKey } from '@/lib/stats';
 
@@ -26,7 +27,7 @@ Notifications.setNotificationHandler({
 export async function enableReminders(): Promise<'granted' | 'denied'> {
   if (Platform.OS === 'android') {
     // Android needs a channel before it will show the permission prompt.
-    await Notifications.setNotificationChannelAsync(CHANNEL, { name: 'Daily reminders', importance: Notifications.AndroidImportance.DEFAULT });
+    await Notifications.setNotificationChannelAsync(CHANNEL, { name: t('reminder.channel'), importance: Notifications.AndroidImportance.DEFAULT });
   }
   const current = await Notifications.getPermissionsAsync();
   if (current.granted) return 'granted';
@@ -72,7 +73,7 @@ export async function syncReminders(db: SQLiteDatabase, s: { reminderEnabled: bo
 /** Settings → "Send a test reminder": shows up in 5 seconds (leave the app to see the banner). */
 export async function sendTestReminder() {
   await Notifications.scheduleNotificationAsync({
-    content: { title: 'Time for a quick review', body: 'This is what your daily reminder looks like.' },
+    content: { title: t('reminder.title'), body: t('reminder.testBody') },
     trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 5, channelId: CHANNEL },
   });
 }

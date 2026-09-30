@@ -10,6 +10,7 @@ import { DeckTile } from '@/components/DeckRow';
 import { ExamCard } from '@/components/ExamCard';
 import { InlineMarkup } from '@/components/Markup';
 import { getDeckSummaries, searchNotes, setDeckNewPerDay, type DeckSummary, type NoteListItem } from '@/db/queries';
+import { t } from '@/i18n';
 import { formatInterval } from '@/lib/fsrs';
 import { goBack } from '@/lib/nav';
 import { NOTE_TYPE_LABEL, notePreview, parseNote } from '@/lib/notes';
@@ -18,9 +19,14 @@ import { colors, fonts, radius, spacing, touchTarget, type } from '@/theme';
 
 /** "Code · 1 card · Due in 3 days" */
 function noteMeta(n: NoteListItem, now: number) {
-  const status = n.all_new || n.next_due == null ? 'New' : n.next_due <= now ? 'Due now' : `Due in ${formatInterval(new Date(n.next_due), new Date(now))}`;
+  const status =
+    n.all_new || n.next_due == null
+      ? t('common.new')
+      : n.next_due <= now
+        ? t('deck.dueNow')
+        : t('deck.dueIn', { interval: formatInterval(new Date(n.next_due), new Date(now)) });
   const typeLabel = NOTE_TYPE_LABEL[parseNote(n.type, n.fields).type];
-  return [typeLabel, `${n.card_count} card${n.card_count === 1 ? '' : 's'}`, status].join(' · ');
+  return [typeLabel, t('common.cards', { count: n.card_count }), status].join(' · ');
 }
 
 export default function DeckDetail() {
@@ -56,13 +62,13 @@ export default function DeckDetail() {
   const header = deck && (
     <View style={styles.headerBlock}>
       <View style={styles.topBar}>
-        <Pressable onPress={goBack} accessibilityRole="button" accessibilityLabel="Back" style={styles.iconButton}>
+        <Pressable onPress={goBack} accessibilityRole="button" accessibilityLabel={t('common.back')} style={styles.iconButton}>
           <Ionicons name="arrow-back" size={22} color={colors.ink} />
         </Pressable>
         <Pressable
           onPress={() => router.push({ pathname: '/deck/[deckId]/edit', params: { deckId } })}
           accessibilityRole="button"
-          accessibilityLabel="Edit deck"
+          accessibilityLabel={t('deckForm.editDeck')}
           style={styles.iconButton}
         >
           <Ionicons name="create-outline" size={22} color={colors.ink} />
@@ -74,8 +80,11 @@ export default function DeckDetail() {
         <View style={{ flex: 1 }}>
           <Text style={type.cardTitle}>{deck.name}</Text>
           <Text style={type.caption}>
-            {deck.total} card{deck.total === 1 ? '' : 's'} · {deck.total ? Math.round((deck.mastered / deck.total) * 100) : 0}% mastered ·{' '}
-            {due} due
+            {t('deck.summary', {
+              cards: t('common.cards', { count: deck.total }),
+              mastered: deck.total ? Math.round((deck.mastered / deck.total) * 100) : 0,
+              due,
+            })}
           </Text>
         </View>
       </View>
@@ -93,13 +102,13 @@ export default function DeckDetail() {
 
       <View style={styles.actions}>
         <Button
-          title={due ? 'Study now' : 'Nothing due'}
+          title={due ? t('deck.studyNow') : t('today.nothingDue')}
           disabled={!due}
           onPress={() => router.push({ pathname: '/study/[deckId]', params: { deckId } })}
           style={{ flex: 1 }}
         />
         <Button
-          title="Add card"
+          title={t('deck.addCard')}
           variant="secondary"
           onPress={() => router.push({ pathname: '/card/new', params: { deckId } })}
           style={{ flex: 1 }}
@@ -111,9 +120,9 @@ export default function DeckDetail() {
         <TextInput
           value={query}
           onChangeText={setQuery}
-          placeholder="Search cards"
+          placeholder={t('deck.search')}
           placeholderTextColor={colors.muted}
-          accessibilityLabel="Search cards"
+          accessibilityLabel={t('deck.search')}
           style={styles.searchInput}
           autoCorrect={false}
           clearButtonMode="while-editing"
@@ -133,14 +142,14 @@ export default function DeckDetail() {
         ItemSeparatorComponent={() => <View style={{ height: spacing.sm }} />}
         ListEmptyComponent={
           deck ? (
-            <Text style={[type.body, styles.empty]}>{query ? 'No cards match your search.' : 'No cards yet. Tap “Add card”.'}</Text>
+            <Text style={[type.body, styles.empty]}>{query ? t('deck.noMatch') : t('deck.empty')}</Text>
           ) : null
         }
         renderItem={({ item }) => (
           <Pressable
             onPress={() => router.push({ pathname: '/card/[noteId]', params: { noteId: String(item.id) } })}
             accessibilityRole="button"
-            accessibilityHint="Edit card"
+            accessibilityHint={t('study.edit')}
             style={({ pressed }) => [styles.cardRow, pressed && { opacity: 0.9 }]}
           >
             <View style={{ flex: 1, gap: 4 }}>
@@ -150,12 +159,12 @@ export default function DeckDetail() {
                 <Text style={styles.tags} numberOfLines={1}>
                   {item.tags
                     .split(' ')
-                    .map((t) => `#${t}`)
+                    .map((tag) => `#${tag}`)
                     .join('  ')}
                 </Text>
               )}
             </View>
-            {!!item.any_flagged && <Ionicons name="flag" size={16} color={colors.accent} accessibilityLabel="Flagged" />}
+            {!!item.any_flagged && <Ionicons name="flag" size={16} color={colors.accent} accessibilityLabel={t('deck.flagged')} />}
             <Ionicons name="chevron-forward" size={18} color={colors.muted} />
           </Pressable>
         )}

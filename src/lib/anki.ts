@@ -12,6 +12,7 @@ import { unzipSync } from 'fflate';
 import { decompress } from 'fzstd';
 
 import type { FsrsColumns } from '@/lib/fsrs';
+import { t } from '@/i18n';
 import { htmlToMarkup } from '@/lib/html';
 import { cardOrds, parseTags, validateNote, type NoteData } from '@/lib/notes';
 
@@ -24,11 +25,11 @@ export function extractCollection(apkg: Uint8Array): Uint8Array {
     // Only unpack the collection; media can be hundreds of MB.
     files = unzipSync(apkg, { filter: (f) => f.name.startsWith('collection.anki') });
   } catch {
-    throw new ImportError('This file isn’t an Anki deck (.apkg).');
+    throw new ImportError(t('import.notAnkiDeck'));
   }
   if (files['collection.anki21b']) return decompress(files['collection.anki21b']);
   const db = files['collection.anki21'] ?? files['collection.anki2'];
-  if (!db) throw new ImportError('No Anki collection found in this file.');
+  if (!db) throw new ImportError(t('import.noCollection'));
   return db;
 }
 
@@ -196,7 +197,7 @@ export function convertCollection(col: AnkiCollection, { keepProgress }: { keepP
       }
     }
 
-    const deckName = deckDisplayName(col.decks.get(cards[0].did) ?? 'Imported');
+    const deckName = deckDisplayName(col.decks.get(cards[0].did) ?? t('import.defaultDeck'));
     if (!decks.has(deckName)) decks.set(deckName, []);
     decks.get(deckName)!.push({ note, tags: parseTags(n.tags), schedule });
   }

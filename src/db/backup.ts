@@ -8,6 +8,8 @@
  */
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import { t } from '@/i18n';
+
 import { MIGRATIONS } from './schema';
 
 // The app was called Recall when this format was defined; keep the tag so old backups still restore.
@@ -49,14 +51,14 @@ export function parseBackup(text: string): Backup {
   try {
     data = JSON.parse(text);
   } catch {
-    throw new BackupError('This file isn’t a Cardly backup (it isn’t valid JSON).');
+    throw new BackupError(t('backup.notJson'));
   }
-  if (data?.format !== BACKUP_FORMAT) throw new BackupError('This file isn’t a Cardly backup.');
+  if (data?.format !== BACKUP_FORMAT) throw new BackupError(t('backup.notBackup'));
   if ((data.version ?? 0) > BACKUP_VERSION || (data.schema ?? 0) > MIGRATIONS.length) {
-    throw new BackupError('This backup was made by a newer version of Cardly. Update the app, then try again.');
+    throw new BackupError(t('backup.newer'));
   }
-  for (const t of TABLES) {
-    if (!Array.isArray(data.tables?.[t])) throw new BackupError('This backup is incomplete or damaged.');
+  for (const table of TABLES) {
+    if (!Array.isArray(data.tables?.[table])) throw new BackupError(t('backup.incomplete'));
   }
   return data as Backup;
 }
@@ -93,6 +95,6 @@ export async function restoreBackup(db: SQLiteDatabase, backup: Backup) {
     }
 
     const broken = await db.getAllAsync('PRAGMA foreign_key_check');
-    if (broken.length) throw new BackupError('This backup is damaged: some cards point at notes or decks that aren’t in it.');
+    if (broken.length) throw new BackupError(t('backup.broken'));
   });
 }

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { t } from '@/i18n';
 import { highlight, languageLabel } from '@/lib/highlight';
 import { codeColors, fonts, radius } from '@/theme';
 
@@ -28,7 +29,7 @@ export function CodeBlock({
     <View style={[styles.box, { backgroundColor: palette.bg }, !dark && styles.boxLight]}>
       {showLanguage && !!language && <Text style={[styles.lang, { color: palette.comment }]}>{languageLabel(language)}</Text>}
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <Text style={[dark ? styles.code : styles.codeLight, { color: palette.plain }]} accessibilityLabel={`${languageLabel(language)} code: ${code}`}>
+        <Text style={[dark ? styles.code : styles.codeLight, { color: palette.plain }]} accessibilityLabel={t('codeBlock.a11y', { language: languageLabel(language), code })}>
           {runs.map((r, i) => (
             <Text key={i} style={{ color: palette[r.role] }}>
               {r.text}
